@@ -3,42 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HT CINEMA | Dünyanın Filmi</title>
+    <title>HT CINEMA | Geliştirici Vizyonu</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="dark-theme">
 
-    <header>
-        <div class="nav-container">
-            <div class="logo">HT<span>CINEMA</span></div>
-            <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Film axtar...">
-                <button onclick="searchMovies()"><i class="fas fa-search"></i></button>
+    <div id="app">
+        
+        <header id="header-component"></header>
+
+        <main>
+            <div class="hero-section" id="hero-component"></div>
+            <div class="category-section" id="category-component"></div>
+            
+            <div class="content-section">
+                <div class="container">
+                    <h2 id="section-title">Populyar Filmlər</h2>
+                    <div class="movie-grid" id="movie-grid">
+                        </div>
+                    <div class="load-more-container">
+                        <button id="load-more-btn" class="btn-primary">Daha Çox Yüklə <i class="fas fa-chevron-down"></i></button>
+                    </div>
+                </div>
             </div>
-            <div class="lang-switcher">
-                <span onclick="changeLang('az')">AZ</span>
-                <span onclick="changeLang('tr')">TR</span>
-                <span onclick="changeLang('en')">EN</span>
-            </div>
+        </main>
+
+        <div id="movie-modal" class="modal">
+            <div class="modal-backdrop close-modal"></div>
+            <div class="modal-content" id="modal-details">
+                </div>
         </div>
-    </header>
 
-    <main>
-        <div id="genre-tags" class="genres">
-            </div>
-
-        <h2 id="section-title">Populyar Filmlər</h2>
-        <div id="movie-grid" class="movie-grid">
-            </div>
-    </main>
-
-    <div id="movie-modal" class="modal">
-        <span class="close">&times;</span>
-        <div class="modal-content" id="modal-data">
-            </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>
