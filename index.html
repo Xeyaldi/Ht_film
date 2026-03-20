@@ -12,7 +12,14 @@
             --bg-black: #141414;
         }
 
-        body { background-color: var(--bg-black); color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { 
+            background-color: var(--bg-black); 
+            color: #fff; 
+            font-family: 'Roboto', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            overflow-x: hidden; 
+        }
 
         /* --- NAVİQASİYA (NETFLIX STYLE) --- */
         nav {
@@ -39,7 +46,7 @@
         .banner__button {
             cursor: pointer; color: #fff; border: none; font-weight: 700; border-radius: 4px;
             padding: 0.7rem 2.2rem; margin-right: 1rem; background-color: rgba(51, 51, 51, 0.7); transition: 0.3s;
-            display: inline-flex; align-items: center; gap: 10px;
+            display: inline-flex; align-items: center; gap: 10px; font-size: 16px;
         }
         .banner__button:hover { background-color: #fff; color: #000; }
         .banner--fadeBottom { height: 12rem; background-image: linear-gradient(180deg, transparent, rgba(37,37,37,0.6), var(--bg-black)); position: absolute; bottom: 0; width: 100%; left: 0; }
@@ -47,7 +54,7 @@
         /* --- CƏRGƏLƏR (ROWS) --- */
         .row { margin-left: 4%; margin-top: 25px; }
         .row__title { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; color: #e5e5e5; }
-        .row__posters { display: flex; overflow-y: hidden; overflow-x: scroll; padding: 20px 0; scrollbar-width: none; -ms-overflow-style: none; }
+        .row__posters { display: flex; overflow-y: hidden; overflow-x: scroll; padding: 20px 0; scrollbar-width: none; }
         .row__posters::-webkit-scrollbar { display: none; }
         
         .row__poster {
@@ -64,19 +71,19 @@
         .top10-img { height: 155px; z-index: 2; border-radius: 4px; transition: 0.3s; }
 
         /* --- MODAL (FİLM PƏNCƏRƏSİ) --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; overflow-y: auto; }
-        .modal-content { width: 850px; margin: 40px auto; background: #181818; border-radius: 12px; position: relative; overflow: hidden; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
+        .modal-content { width: 850px; margin: 40px auto; background: #181818; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 0 50px #000; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; z-index: 100; color: #fff; }
         iframe { width: 100%; height: 480px; border: none; background: #000; }
         .modal-body { padding: 35px; }
 
         .cast-card img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid #333; margin-bottom: 5px; }
         
-        /* ŞƏRH BÖLMƏSİ AZƏRBAYCAN DİLİNDƏ */
+        /* ŞƏRH BÖLMƏSİ */
         .comment-box { background: #222; padding: 20px; border-radius: 8px; margin-top: 30px; }
         .comment-input { background: #111; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 4px; margin-top: 10px; box-sizing: border-box; }
 
-        @media (max-width: 768px) { .modal-content { width: 95%; } .banner__title { font-size: 2rem; } }
+        @media (max-width: 768px) { .modal-content { width: 95%; } .banner__title { font-size: 2rem; } .top10-number { font-size: 100px; } }
     </style>
 </head>
 <body>
@@ -84,10 +91,10 @@
 <nav id="nav">
     <a href="javascript:location.reload()" class="logo">XEYAL FİLM</a>
     <ul class="nav-links">
-        <li><a href="#">Ana Səhifə</a></li>
+        <li><a href="#" onclick="javascript:location.reload()">Ana Səhifə</a></li>
         <li><a href="#" onclick="loadCategory('/discover/tv', 'Seriallar')">Seriallar</a></li>
         <li><a href="#" onclick="loadCategory('/discover/movie', 'Filmlər')">Filmlər</a></li>
-        <li><a href="#" onclick="loadCategory('/discover/movie', 'Azərbaycan Filmləri', '&with_original_language=az')">Yerli Filmlər</a></li>
+        <li><a href="#" onclick="loadCategory('/discover/movie', 'Yerli Filmlər', '&with_original_language=az')">Yerli Filmlər</a></li>
         <li><a href="#" onclick="loadFavorites()">Siyahım</a></li>
     </ul>
     <div class="nav-right">
@@ -117,7 +124,7 @@
 </div>
 
 <div class="row">
-    <h2 class="row__title">Azərbaycanda Top 10</h2>
+    <h2 class="row__title">Dünyada Top 10</h2>
     <div class="row__posters" id="top10Row"></div>
 </div>
 
@@ -134,13 +141,13 @@
 <div id="modal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeP()">&times;</span>
-        <iframe id="ifr" src="" allowfullscreen></iframe>
+        <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
         <div class="modal-body">
             <h2 id="mT" style="color:var(--netflix-blue); margin:0;"></h2>
             <p id="mD" style="color:#aaa; line-height:1.6; margin-top:15px; font-size:15px;"></p>
             
             <h4 style="margin-top:25px; border-left:4px solid var(--netflix-blue); padding-left:10px;">AKTYOR HEYƏTİ</h4>
-            <div id="mCast" style="display:flex; gap:15px; overflow-x:auto; padding:15px 0;"></div>
+            <div id="mCast" style="display:flex; gap:15px; overflow-x:auto; padding:15px 0; scrollbar-width:none;"></div>
 
             <div style="margin-top:20px; display:flex; gap:10px;">
                 <button class="banner__button" style="background:var(--netflix-blue); color:#fff;" onclick="setS(1)">Əsas Server</button>
@@ -149,11 +156,11 @@
             </div>
 
             <div class="comment-box">
-                <h4 style="margin:0;">FİKİRLƏRİNİZ</h4>
+                <h4 style="margin:0;">ŞƏRHLƏR</h4>
                 <div id="comList" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
                 <input type="text" id="comUser" class="comment-input" placeholder="Adınız...">
-                <textarea id="comText" class="comment-input" style="height:70px; resize:none;" placeholder="Film haqqında düşüncələrinizi yazın..."></textarea>
-                <button class="banner__button" style="margin-top:10px; width:100%; justify-content:center;" onclick="addComment()">Şərhi Gönder</button>
+                <textarea id="comText" class="comment-input" style="height:70px; resize:none;" placeholder="Fikrinizi bura yazın..."></textarea>
+                <button class="banner__button" style="margin-top:10px; width:100%; justify-content:center;" onclick="addComment()">Şərhi Göndər</button>
             </div>
         </div>
     </div>
@@ -287,6 +294,15 @@
         if(v) loadCategory('/search/multi', `Axtarış nəticəsi: ${v}`, `&query=${encodeURIComponent(v)}`);
     }
     document.getElementById('srch').onkeypress = (e) => { if(e.key === 'Enter') performSearch(); };
+
+    function loadFavorites() {
+        const favs = JSON.parse(localStorage.getItem('x_favs') || '[]');
+        const sec = document.getElementById('favSection');
+        if(favs.length > 0) {
+            sec.style.display = 'block';
+            document.getElementById('favRow').innerHTML = favs.map(f => `<img src="${POSTER + f.img}" class="row__poster" onclick="openP(${f.id}, '${f.type}')">`).join('');
+        } else sec.style.display = 'none';
+    }
 </script>
 </body>
 </html>
