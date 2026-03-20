@@ -1,0 +1,67 @@
+:root {
+    --main-red: #e50914;
+    --bg-black: #080808;
+    --card-bg: #141414;
+}
+
+body {
+    background-color: var(--bg-black);
+    color: white;
+    margin: 0;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+header {
+    background: rgba(0,0,0,0.9);
+    padding: 15px 5%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-container { display: flex; justify-content: space-between; align-items: center; }
+
+.logo { font-size: 24px; font-weight: 900; cursor: pointer; }
+.logo span { color: var(--main-red); }
+
+.search-bar { display: flex; background: #222; border-radius: 20px; padding: 5px 15px; width: 40%; }
+.search-bar input { background: transparent; border: none; color: white; width: 100%; outline: none; }
+.search-bar button { background: transparent; border: none; color: #888; cursor: pointer; }
+
+.lang-switcher span { margin-left: 10px; cursor: pointer; font-size: 14px; color: #888; font-weight: bold; }
+.lang-switcher span:hover { color: var(--main-red); }
+
+.genres { display: flex; gap: 10px; padding: 20px 5%; overflow-x: auto; margin-top: 20px; }
+.genre-tag { background: #222; padding: 8px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+.genre-tag:hover { background: var(--main-red); }
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
+    padding: 20px 5%;
+}
+
+.movie-card {
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.movie-card:hover { transform: translateY(-10px); }
+.movie-card img { width: 100%; height: 270px; object-fit: cover; }
+.movie-card h3 { font-size: 14px; padding: 10px; margin: 0; height: 40px; overflow: hidden; }
+
+/* Modal (Film detalları pəncərəsi) */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); overflow-y: auto;}
+.modal-content { margin: 5% auto; width: 80%; max-width: 900px; display: flex; gap: 30px; animation: fadeIn 0.5s; }
+.close { position: absolute; right: 30px; top: 20px; font-size: 40px; cursor: pointer; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 768px) {
+    .modal-content { flex-direction: column; width: 95%; }
+    .search-bar { width: 30%; }
+}
