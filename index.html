@@ -357,7 +357,21 @@
     }
     function loadSideNet() {
         fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${KEY}`).then(r => r.json()).then(d => {
-                    document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+                    document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map(m => `<div>• ${m.title || m.name}</div>`).join('');
+        });
+    }
+
+    function setupTV(m) {
+        const sSel = document.getElementById('seasonSel');
+        sSel.innerHTML = '';
+        for(let i=1; i<=m.number_of_seasons; i++) sSel.innerHTML += `<option value="${i}">${i}. Sezon</option>`;
+        updateEpisodes(1, m.id);
+    }
+
+    async function updateEpisodes(s, id) {
+        const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
+        const data = await res.json();
+        document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
     }
 
     function updateTV() {
