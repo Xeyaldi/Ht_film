@@ -80,7 +80,6 @@
         .cast-item { min-width: 70px; text-align: center; font-size: 10px; }
         .cast-item img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 1px solid #444; }
 
-        /* ŞƏRH BÖLMƏSİ STYLE */
         .comment-section { margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
         .comment-input { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; outline: none; margin-bottom: 10px; box-sizing: border-box; }
         .comment-btn { background: var(--neon-blue); color: #000; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
@@ -89,7 +88,8 @@
         .comment-item small { color: #777; font-size: 11px; }
 
         .side-block { background: var(--sidebar-bg); border-radius: 6px; padding: 15px; margin-bottom: 20px; border-left: 3px solid var(--neon-purple); }
-        .genre-btn { background: #1e1e26; padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer; text-align: center; transition: 0.2s; margin-bottom: 5px; }
+        .genre-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .genre-btn { background: #1e1e26; padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer; text-align: center; transition: 0.2s; }
         .genre-btn:hover { background: var(--neon-purple); color: #fff; }
         .robot-btn { background: #d92323; color: #fff; text-align: center; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
 
@@ -99,6 +99,12 @@
 
         .tv-controls { display: none; gap: 10px; margin: 15px 0; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
         .tv-controls select { background: #222; color: #fff; border: 1px solid var(--neon-blue); padding: 8px; border-radius: 4px; }
+
+        .action-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .action-btns button { padding: 10px 20px; cursor: pointer; border: none; font-weight: bold; border-radius: 4px; }
+        .btn-server1 { background: var(--neon-blue); color: #000; }
+        .btn-server2 { background: var(--neon-purple); color: #fff; }
+        .btn-trailer { background: #ff4757; color: #fff; }
 
         @media (max-width: 768px) { aside { display: none; } .container { padding: 10px; } iframe { height: 250px; } }
     </style>
@@ -152,7 +158,7 @@
 <div id="modal" class="modal">
     <div class="player-content">
         <span onclick="closeP()" style="color: #fff; font-size: 40px; cursor: pointer; float: right;">&times;</span>
-        <iframe id="ifr" src="" allowfullscreen></iframe>
+        <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
         
         <div class="tv-controls" id="tvControls">
             Sezon: <select id="seasonSel" onchange="updateTV()"></select>
@@ -166,9 +172,10 @@
             <h4 style="color:var(--neon-purple); margin-top:20px;">AKTYORLAR</h4>
             <div class="cast-list" id="mCast"></div>
 
-            <div style="margin-top: 20px;">
-                <button onclick="setS(1)" style="padding: 10px 20px; cursor:pointer; background:var(--neon-blue); border:none; font-weight:bold;">Server 1</button>
-                <button onclick="setS(2)" style="padding: 10px 20px; cursor:pointer; background:var(--neon-purple); border:none; color:#fff; font-weight:bold;">Server 2</button>
+            <div class="action-btns">
+                <button class="btn-server1" onclick="setS(1)">Server 1</button>
+                <button class="btn-server2" onclick="setS(2)">Server 2</button>
+                <button class="btn-trailer" id="btnTrailer" onclick="openTrailer()">🎬 Fragman</button>
             </div>
 
             <div class="comment-section">
@@ -188,7 +195,7 @@
 <script>
     const KEY = 'c972e47d1574ac86dfe1d93d7e4a0b35';
     const IMG = 'https://image.tmdb.org/t/p/w500';
-    let curID, curType, curS = 1, curEp = 1;
+    let curID, curType, curS = 1, curEp = 1, curTrailer = "";
 
     window.onload = () => {
         loadSlider(); loadUpcoming(); loadMain('/trending/all/day');
@@ -218,51 +225,45 @@
 
     async function openP(id, type) {
         curID = id; curType = type;
-        const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits,recommendations`);
+        const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits,recommendations,videos`);
         const m = await res.json();
         
         document.getElementById('mT').innerText = m.title || m.name;
         document.getElementById('mD').innerText = m.overview || "Məlumat tapılmadı.";
         
-        // Cast
-        document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `
-            <div class="cast-item">
-                <img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/60'}">
-                <p>${c.name}</p>
-            </div>`).join('');
+        // Fragman tapmaq
+        const trailer = m.videos.results.find(v => v.type === 'Trailer');
+        curTrailer = trailer ? `https://www.youtube.com/embed/${trailer.key}` : "";
+        document.getElementById('btnTrailer').style.display = curTrailer ? "block" : "none";
 
-        // Recs
-        document.getElementById('mRecs').innerHTML = m.recommendations.results.slice(0, 10).map(r => `
-            <div class="slide-card" onclick="openP(${r.id}, '${type}')">
-                <img src="${IMG + (r.backdrop_path || r.poster_path)}">
-                <div class="slide-meta">${r.title || r.name}</div>
-            </div>`).join('');
+        // Cast & Recs
+        document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `<div class="cast-item"><img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/60'}"><p>${c.name}</p></div>`).join('');
+        document.getElementById('mRecs').innerHTML = m.recommendations.results.slice(0, 10).map(r => `<div class="slide-card" onclick="openP(${r.id}, '${type}')"><img src="${IMG + (r.backdrop_path || r.poster_path)}"><div class="slide-meta">${r.title || r.name}</div></div>`).join('');
 
-        if (type === 'tv') {
-            document.getElementById('tvControls').style.display = 'flex';
-            setupTV(m);
-        } else {
-            document.getElementById('tvControls').style.display = 'none';
-        }
+        if (type === 'tv') { document.getElementById('tvControls').style.display = 'flex'; setupTV(m); } 
+        else { document.getElementById('tvControls').style.display = 'none'; }
 
         addToHistory(m, type);
-        loadComments(id); // Şərhləri yüklə
+        loadComments(id);
         setS(1);
         document.getElementById('modal').style.display = 'block';
     }
 
-    // --- ŞƏRH FUNKSİYALARI ---
+    function openTrailer() { if(curTrailer) document.getElementById('ifr').src = curTrailer; }
+
+    function setS(s) {
+        const b = s === 1 ? 'https://vidsrc.to/embed' : 'https://vidsrc.xyz/embed';
+        document.getElementById('ifr').src = curType === 'movie' ? `${b}/movie/${curID}` : `${b}/tv/${curID}/${curS}/${curEp}`;
+    }
+
     function addComment() {
         const user = document.getElementById('comUser').value || "Anonim";
         const text = document.getElementById('comText').value;
         if(!text) return;
-
         let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
         if(!comments[curID]) comments[curID] = [];
-
         comments[curID].unshift({ user, text, date: new Date().toLocaleString() });
         localStorage.setItem('x_comments', JSON.stringify(comments));
-        
         document.getElementById('comText').value = '';
         loadComments(curID);
     }
@@ -271,20 +272,9 @@
         let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
         const list = document.getElementById('comList');
         const movieComments = comments[id] || [];
-        
-        if(movieComments.length === 0) {
-            list.innerHTML = '<p style="font-size:12px; color:#555;">Hələ şərh yoxdur. İlk şərhi sən yaz!</p>';
-        } else {
-            list.innerHTML = movieComments.map(c => `
-                <div class="comment-item">
-                    <div style="color:var(--neon-blue); font-weight:bold; font-size:13px;">${c.user}</div>
-                    <div style="font-size:13px; margin:5px 0;">${c.text}</div>
-                    <small>${c.date}</small>
-                </div>`).join('');
-        }
+        list.innerHTML = movieComments.length === 0 ? '<p style="font-size:12px; color:#555;">İlk şərhi sən yaz!</p>' : movieComments.map(c => `<div class="comment-item"><div style="color:var(--neon-blue); font-weight:bold; font-size:13px;">${c.user}</div><div style="font-size:13px; margin:5px 0;">${c.text}</div><small>${c.date}</small></div>`).join('');
     }
 
-    // --- DİGƏR FUNKSİYALAR (SİLMƏDƏN) ---
     function getFavs() { return JSON.parse(localStorage.getItem('x_favs') || '[]'); }
     function toggleFav(e, id, title, img, type) {
         e.stopPropagation();
@@ -301,13 +291,10 @@
         const sec = document.getElementById('favSection');
         if(favs.length > 0) {
             sec.style.display = 'block';
-            document.getElementById('favList').innerHTML = favs.map(f => `
-                <div class="slide-card" onclick="openP(${f.id}, '${f.type}')">
-                    <img src="${IMG + f.img}">
-                    <div class="slide-meta">${f.title}</div>
-                </div>`).join('');
+            document.getElementById('favList').innerHTML = favs.map(f => `<div class="slide-card" onclick="openP(${f.id}, '${f.type}')"><img src="${IMG + f.img}"><div class="slide-meta">${f.title}</div></div>`).join('');
         } else sec.style.display = 'none';
     }
+
     function randomMovie() { openP(Math.floor(Math.random() * 500) + 100, 'movie'); }
     function addToHistory(m, type) {
         let history = JSON.parse(localStorage.getItem('x_hist') || '[]');
@@ -320,11 +307,7 @@
         const hist = JSON.parse(localStorage.getItem('x_hist') || '[]');
         if(hist.length > 0) {
             document.getElementById('historySection').style.display = 'block';
-            document.getElementById('historyList').innerHTML = hist.map(h => `
-                <div class="slide-card" onclick="openP(${h.id}, '${h.type}')">
-                    <img src="${IMG + h.img}">
-                    <div class="slide-meta">${h.title}</div>
-                </div>`).join('');
+            document.getElementById('historyList').innerHTML = hist.map(h => `<div class="slide-card" onclick="openP(${h.id}, '${h.type}')"><img src="${IMG + h.img}"><div class="slide-meta">${h.title}</div></div>`).join('');
         }
     }
     async function loadSlider() {
@@ -340,7 +323,9 @@
     async function loadGenres() {
         const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
         const data = await res.json();
-        document.getElementById('sideGenres').innerHTML = data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+        const list = document.getElementById('sideGenres');
+        list.innerHTML = `<div class="genre-btn" style="background:#d92323; font-weight:bold;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
+        list.innerHTML += data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
     }
     function loadSideNet() {
         fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`).then(r => r.json()).then(d => {
@@ -358,17 +343,15 @@
         const data = await res.json();
         document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
     }
+
     function updateTV() {
         curS = document.getElementById('seasonSel').value;
         curEp = document.getElementById('episodeSel').value;
         if(event.target.id === 'seasonSel') updateEpisodes(curS, curID);
         setS(1);
     }
-    function setS(s) {
-        const b = s === 1 ? 'https://vidsrc.to/embed' : 'https://vidsrc.xyz/embed';
-        document.getElementById('ifr').src = curType === 'movie' ? `${b}/movie/${curID}` : `${b}/tv/${curID}/${curS}/${curEp}`;
-    }
-        function closeP() { 
+
+    function closeP() { 
         document.getElementById('modal').style.display = 'none'; 
         document.getElementById('ifr').src = ''; 
     }
