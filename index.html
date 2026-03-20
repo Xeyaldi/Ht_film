@@ -50,9 +50,7 @@
             -webkit-text-fill-color: transparent;
             text-decoration: none;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            letter-spacing: 2px;
+            align-items: center; gap: 12px; letter-spacing: 2px;
         }
 
         .search-box {
@@ -83,7 +81,6 @@
         .search-item:hover { background: rgba(255,255,255,0.1); }
         .search-item img { width: 45px; height: 65px; border-radius: 8px; object-fit: cover; }
 
-        /* Struktur Düzəlişi: Sağ boşluğu doldurmaq üçün */
         .container { padding: 20px 6%; }
         .top-layout { display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; }
         main { flex: 3; min-width: 320px; }
@@ -95,12 +92,10 @@
             margin: 40px 0 20px; 
             color: #fff;
             display: flex;
-            align-items: center;
-            gap: 15px;
+            align-items: center; gap: 15px;
         }
         .grid-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--main-blue), transparent); }
 
-        /* Filmlər Grid - yan-yana düzülür və tam yayılır */
         .movie-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
@@ -161,7 +156,24 @@
         .slide-card img { width: 100%; height: 100%; object-fit: cover; }
         .slide-meta { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-size: 13px; }
 
-        @media (max-width: 768px) { .movie-grid { grid-template-columns: repeat(2, 1fr); } iframe { height: 350px; } .container { padding: 15px; } }
+        /* Mobil Versiya və Genişləndirmə (Tezliklə bölməsi daxil) */
+        @media (max-width: 768px) { 
+            .container { padding: 10px 4%; }
+            .top-layout { gap: 15px; }
+            main { min-width: 100%; }
+            aside { min-width: 100%; order: -1; } /* Sidebar-ı mobil variantda yuxarı atır */
+            .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .m-card img { height: 240px; }
+            iframe { height: 250px; border-radius: 10px; }
+            .logo { font-size: 20px; }
+            .search-box { padding: 4px 15px; }
+            .search-box input { width: 150px; }
+            .grid-header { font-size: 16px; margin: 25px 0 15px; }
+            .player-content { margin: 10px auto; padding: 10px; }
+        }
+
+        /* Tezliklə bölməsini bütün eninə yaymaq üçün */
+        .full-width-section { width: 100%; }
     </style>
 </head>
 <body>
@@ -188,8 +200,6 @@
             </div>
             <div class="grid-header"><i class="fas fa-star" style="color:#f5c518"></i> BU HƏFTƏ TRENDDƏ</div>
             <div class="top-slider" id="topSlider"></div>
-            <div class="grid-header"><i class="fas fa-calendar-alt"></i> TEZLİKLƏ</div>
-            <div id="upcomingList" style="display:flex; gap:20px; overflow-x:auto; padding:10px 0;"></div>
         </main>
         <aside>
             <div class="robot-btn" onclick="randomMovie()"><i class="fas fa-random"></i> MƏNƏ BİR FİLM ÖNƏR</div>
@@ -202,6 +212,11 @@
                 <div id="sideGenres" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
             </div>
         </aside>
+    </div>
+
+    <div class="full-width-section">
+        <div class="grid-header"><i class="fas fa-calendar-alt"></i> TEZLİKLƏ</div>
+        <div id="upcomingList" style="display:flex; gap:20px; overflow-x:auto; padding:10px 0; scrollbar-width: none;"></div>
     </div>
 
     <div class="grid-header" id="mainTitle">🔥 SON ƏLAVƏLƏR</div>
@@ -234,6 +249,7 @@
 
         <div style="margin-top:40px; background:rgba(255,255,255,0.03); padding:30px; border-radius:20px; border:1px solid rgba(255,255,255,0.05);">
             <p id="mD" style="line-height:1.8; color:#bbb; font-size:16px;"></p>
+            
             <h3 style="color:var(--main-blue); margin-top:40px;">AKTYORLAR</h3>
             <div id="mCast" style="display:flex; gap:20px; overflow-x:auto; padding:20px 0;"></div>
 
@@ -383,148 +399,172 @@
         if (type === 'tv') { 
             document.getElementById('tvControls').style.display = 'flex'; 
             let sHtml = "";
-            for(let i=1; i<=m.number_of_seasons; i++) sHtml += `<option value="${i}">${i}. Sezon</option>`;
-            document.getElementById('seasonSel').innerHTML = sHtml;
-            updateEpisodes(1, id);
-        } else { 
-            document.getElementById('tvControls').style.display = 'none'; 
+            for (let i = 1; i <= m.number_of_seasons; i++) {
+            sHtml += `<option value="${i}">${i}. Sezon</option>`;
         }
-
-        addToHistory(m, type); loadComments(id); autoSetSource();
-        document.getElementById('modal').style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        document.getElementById('seasonSel').innerHTML = sHtml;
+        updateEpisodes(1, id);
+    } else {
+        document.getElementById('tvControls').style.display = 'none';
     }
 
-    function addToHistory(m, type) {
-        let history = JSON.parse(localStorage.getItem('x_hist') || '[]');
-        history = history.filter(h => h.id !== m.id);
-        history = history.filter(h => h.id !== m.id);
-        history.unshift({id: m.id, title: m.title || m.name, img: m.backdrop_path || m.poster_path, type});
-        localStorage.setItem('x_hist', JSON.stringify(history.slice(0, 10)));
-        loadHistory();
-    }
+    addToHistory(m, type);
+    loadComments(id);
+    autoSetSource();
+    document.getElementById('modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
 
-    function loadHistory() {
-        const hist = JSON.parse(localStorage.getItem('x_hist') || '[]');
-        const sec = document.getElementById('historySection');
-        if(hist.length > 0) {
-            sec.style.display = 'block';
-            document.getElementById('historyList').innerHTML = hist.map(h => `
-                <div class="slide-card" onclick="openP(${h.id}, '${h.type}')">
-                    <img src="${IMG + h.img}">
-                    <div class="slide-meta">${h.title}</div>
-                </div>`).join('');
-        }
-    }
+// Tarixçəyə əlavə etmə funksiyası (Düzəldildi)
+function addToHistory(m, type) {
+    let history = JSON.parse(localStorage.getItem('x_hist') || '[]');
+    history = history.filter(h => h.id !== m.id);
+    history.unshift({
+        id: m.id,
+        title: m.title || m.name,
+        img: m.backdrop_path || m.poster_path,
+        type: type
+    });
+    localStorage.setItem('x_hist', JSON.stringify(history.slice(0, 10)));
+    loadHistory();
+}
 
-    async function loadSlider() {
-        try {
-            const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
-            const data = await res.json();
-            document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `
-                <div class="slide-card" onclick="openP(${m.id}, 'movie')">
-                    <img src="${IMG + m.backdrop_path}">
-                    <div class="slide-meta"><b>${m.title}</b></div>
-                </div>`).join('');
-        } catch(e) { console.error(e); }
+function loadHistory() {
+    const hist = JSON.parse(localStorage.getItem('x_hist') || '[]');
+    const sec = document.getElementById('historySection');
+    if (hist.length > 0) {
+        sec.style.display = 'block';
+        document.getElementById('historyList').innerHTML = hist.map(h => `
+            <div class="slide-card" onclick="openP(${h.id}, '${h.type}')">
+                <img src="${IMG + h.img}" loading="lazy">
+                <div class="slide-meta">${h.title}</div>
+            </div>`).join('');
+    } else {
+        sec.style.display = 'none';
     }
+}
 
-    async function loadUpcoming() {
-        try {
-            const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
-            const data = await res.json();
-            document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `
-                <div style="text-align:center; min-width:100px; cursor:pointer;" onclick="openP(${m.id}, 'movie')">
-                    <img src="${IMG + m.poster_path}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--main-purple);">
-                    <p style="font-size:11px; margin-top:10px; font-weight:bold;">${m.title}</p>
-                </div>`).join('');
-        } catch(e) { console.error(e); }
-    }
+// Slider yükləyicisi
+async function loadSlider() {
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
+        const data = await res.json();
+        document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `
+            <div class="slide-card" onclick="openP(${m.id}, 'movie')">
+                <img src="${IMG + m.backdrop_path}" loading="lazy">
+                <div class="slide-meta"><b>${m.title}</b></div>
+            </div>`).join('');
+    } catch (e) { console.error("Slider xətası:", e); }
+}
 
-    async function loadGenres() {
-        try {
-            const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
-            const data = await res.json();
-            document.getElementById('sideGenres').innerHTML = data.genres.slice(0, 12).map(g => `
-                <div class="server-btn" style="padding:8px; font-size:11px; text-align:center; cursor:pointer;" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
-        } catch(e) { console.error(e); }
-    }
+// Gələcək filmlər
+async function loadUpcoming() {
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
+        const data = await res.json();
+        document.getElementById('upcomingList').innerHTML = data.results.slice(0, 12).map(m => `
+            <div style="text-align:center; min-width:100px; cursor:pointer;" onclick="openP(${m.id}, 'movie')">
+                <img src="${IMG + m.poster_path}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--main-purple);">
+                <p style="font-size:11px; margin-top:10px; font-weight:bold;">${m.title}</p>
+            </div>`).join('');
+    } catch (e) { console.error("Upcoming xətası:", e); }
+}
 
-    function loadSideNet() {
-        fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`).then(r => r.json()).then(d => {
+// Janrlar siyahısı
+async function loadGenres() {
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
+        const data = await res.json();
+        document.getElementById('sideGenres').innerHTML = data.genres.slice(0, 14).map(g => `
+            <div class="server-btn" style="padding:8px; font-size:11px; text-align:center; cursor:pointer;" 
+                 onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+    } catch (e) { console.error("Janr xətası:", e); }
+}
+
+// Top 5 siyahısı
+function loadSideNet() {
+    fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`)
+        .then(r => r.json())
+        .then(d => {
             document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map((m, index) => `
                 <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="openP(${m.id}, 'movie')">
-                    <span style="color:var(--main-blue); font-weight:bold; margin-right:10px;">0${index+1}</span> ${m.title}
+                    <span style="color:var(--main-blue); font-weight:bold; margin-right:10px;">0${index + 1}</span> ${m.title}
                 </div>`).join('');
         });
+}
+
+// Serial bölüm yükləyicisi
+async function updateEpisodes(s, id) {
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
+        const data = await res.json();
+        document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `
+            <option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+    } catch (e) { console.error("Bölüm xətası:", e); }
+}
+
+function updateTV() {
+    curS = document.getElementById('seasonSel').value;
+    curEp = document.getElementById('episodeSel').value;
+    if (event.target.id === 'seasonSel') updateEpisodes(curS, curID);
+    autoSetSource();
+}
+
+// Şərh sistemi
+function addComment() {
+    const user = document.getElementById('comUser').value || "Anonim";
+    const text = document.getElementById('comText').value;
+    if (!text) return;
+    let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
+    if (!comments[curID]) comments[curID] = [];
+    comments[curID].unshift({ user, text, date: new Date().toLocaleString() });
+    localStorage.setItem('x_comments', JSON.stringify(comments));
+    document.getElementById('comText').value = '';
+    loadComments(curID);
+}
+
+function loadComments(id) {
+    let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
+    const list = document.getElementById('comList');
+    const movieComments = comments[id] || [];
+    list.innerHTML = movieComments.length === 0 ? '<p style="color:#555;">Hələlik şərh yoxdur.</p>' :
+        movieComments.map(c => `
+            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px;">
+                <b style="color:var(--main-blue);">${c.user}</b> <small style="color:#666; float:right;">${c.date}</small>
+                <p style="margin:10px 0 0; font-size:14px;">${c.text}</p>
+            </div>`).join('');
+}
+
+// Favoritlər sistemi
+function getFavs() { return JSON.parse(localStorage.getItem('x_favs') || '[]'); }
+
+function toggleFav(e, id, title, img, type) {
+    e.stopPropagation();
+    let favs = getFavs();
+    const idx = favs.findIndex(f => f.id === id);
+    if (idx > -1) favs.splice(idx, 1);
+    else favs.unshift({ id, title, img, type });
+    localStorage.setItem('x_favs', JSON.stringify(favs));
+    if(e.target.classList) e.target.classList.toggle('fav-active');
+    loadFavorites();
+}
+
+function loadFavorites() {
+    const favs = getFavs();
+    const sec = document.getElementById('favSection');
+    if (favs.length > 0) {
+        sec.style.display = 'block';
+        document.getElementById('favList').innerHTML = favs.map(f => `
+            <div class="slide-card" onclick="openP(${f.id}, '${f.type}')">
+                <img src="${IMG + f.img}" loading="lazy">
+                <div class="slide-meta">${f.title}</div>
+            </div>`).join('');
+    } else {
+        sec.style.display = 'none';
     }
+}
 
-    async function updateEpisodes(s, id) {
-        try {
-            const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
-            const data = await res.json();
-            document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
-        } catch(e) { console.error(e); }
-    }
-
-    function updateTV() {
-        curS = document.getElementById('seasonSel').value;
-        curEp = document.getElementById('episodeSel').value;
-        if(event.target.id === 'seasonSel') updateEpisodes(curS, curID);
-        autoSetSource();
-    }
-
-    function addComment() {
-        const user = document.getElementById('comUser').value || "Anonim";
-        const text = document.getElementById('comText').value;
-        if(!text) return;
-        let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
-        if(!comments[curID]) comments[curID] = [];
-        comments[curID].unshift({ user, text, date: new Date().toLocaleString() });
-        localStorage.setItem('x_comments', JSON.stringify(comments));
-        document.getElementById('comText').value = '';
-        loadComments(curID);
-    }
-
-    function loadComments(id) {
-        let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
-        const list = document.getElementById('comList');
-        const movieComments = comments[id] || [];
-        list.innerHTML = movieComments.length === 0 ? '<p style="color:#555;">İlk şərhi sən yaz!</p>' : 
-            movieComments.map(c => `
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:15px;">
-                    <b style="color:var(--main-blue);">${c.user}</b> <small style="color:#666; float:right;">${c.date}</small>
-                    <p style="margin:10px 0 0; font-size:14px;">${c.text}</p>
-                </div>`).join('');
-    }
-
-    function getFavs() { return JSON.parse(localStorage.getItem('x_favs') || '[]'); }
-
-    function toggleFav(e, id, title, img, type) {
-        e.stopPropagation();
-        let favs = getFavs();
-        const idx = favs.findIndex(f => f.id === id);
-        if(idx > -1) favs.splice(idx, 1);
-        else favs.unshift({id, title, img, type});
-        localStorage.setItem('x_favs', JSON.stringify(favs));
-        e.target.classList.toggle('fav-active');
-        loadFavorites();
-    }
-
-    function loadFavorites() {
-        const favs = getFavs();
-        const sec = document.getElementById('favSection');
-        if(favs.length > 0) {
-            sec.style.display = 'block';
-            document.getElementById('favList').innerHTML = favs.map(f => `
-                <div class="slide-card" onclick="openP(${f.id}, '${f.type}')">
-                    <img src="${IMG + f.img}">
-                    <div class="slide-meta">${f.title}</div>
-                </div>`).join('');
-        } else sec.style.display = 'none';
-    }
-
-    function randomMovie() { loadMain('/movie/top_rated', '', '🤖 ROBOTUN SEÇİMİ'); }
+function randomMovie() { loadMain('/movie/top_rated', '', '🎬 SƏNİN ÜÇÜN SEÇDİKLƏRİMİZ'); }
 </script>
 </body>
 </html>
