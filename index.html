@@ -56,6 +56,7 @@
             letter-spacing: 2px;
         }
 
+        /* Axtarış Qutusu və Dropdown Stili */
         .search-box {
             background: rgba(255,255,255,0.08);
             border: 1px solid rgba(255,255,255,0.1);
@@ -64,13 +65,36 @@
             align-items: center;
             padding: 6px 20px;
             transition: 0.4s;
+            position: relative;
         }
         .search-box:focus-within { border-color: var(--main-blue); background: rgba(255,255,255,0.15); box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
         .search-box input { background: transparent; border: none; color: #fff; padding: 10px; outline: none; width: 250px; font-size: 14px; }
 
-        .container { display: flex; gap: 30px; padding: 30px 6%; flex-wrap: wrap; }
-        main { flex: 3; min-width: 320px; }
-        aside { flex: 1; min-width: 300px; }
+        #searchDropdown {
+            position: absolute; top: 60px; left: 0; right: 0; 
+            background: rgba(10,10,12,0.98); border: 1px solid var(--main-blue); 
+            border-radius: 15px; z-index: 1001; display: none; 
+            max-height: 400px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .search-item {
+            display: flex; align-items: center; gap: 15px; padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s;
+        }
+        .search-item:hover { background: rgba(255,255,255,0.1); }
+        .search-item img { width: 45px; height: 65px; border-radius: 8px; object-fit: cover; }
+
+        /* Container və Grid Düzəlişi (Yan-yana 3 film) */
+        .container { display: flex; gap: 30px; padding: 30px 6%; flex-wrap: wrap; align-items: flex-start; }
+        main { flex: 4; min-width: 320px; }
+        aside { flex: 1.2; min-width: 280px; }
+
+        .movie-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 25px; 
+        }
 
         .grid-header { 
             font-family: 'Orbitron', sans-serif; 
@@ -84,7 +108,6 @@
         .grid-header::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--main-blue), transparent); }
 
         /* Movie Cards */
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
         .m-card { 
             background: var(--card-bg); 
             border-radius: 15px; 
@@ -96,7 +119,6 @@
         }
         .m-card:hover { transform: translateY(-12px) scale(1.02); border-color: var(--main-blue); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
         .m-card img { width: 100%; height: 270px; object-fit: cover; transition: 0.5s; }
-        .m-card:hover img { filter: brightness(0.5); }
         
         .rating { 
             position: absolute; top: 12px; right: 12px; 
@@ -104,6 +126,9 @@
             padding: 5px 10px; border-radius: 8px; 
             font-size: 12px; font-weight: bold; border: 1px solid rgba(245, 197, 24, 0.3);
         }
+
+        .fav-btn { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.6); color: #fff; padding: 8px; border-radius: 50%; z-index: 5; transition: 0.3s; }
+        .fav-active { color: #ff4757 !important; }
 
         /* Modal & Player */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; }
@@ -130,6 +155,7 @@
             transition: 0.3s; box-shadow: 0 10px 20px rgba(157, 0, 255, 0.3);
         }
 
+        .top-slider { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .slide-card {
             min-width: 260px; height: 150px; border-radius: 12px; overflow: hidden;
             position: relative; cursor: pointer; transition: 0.4s; flex-shrink: 0;
@@ -137,7 +163,7 @@
         .slide-card img { width: 100%; height: 100%; object-fit: cover; }
         .slide-meta { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 15px; font-size: 13px; }
 
-        @media (max-width: 768px) { iframe { height: 350px; } .container { padding: 15px; } }
+        @media (max-width: 768px) { .movie-grid { grid-template-columns: repeat(2, 1fr); } iframe { height: 350px; } .container { padding: 15px; } }
     </style>
 </head>
 <body>
@@ -147,6 +173,7 @@
     <div class="search-box">
         <input type="text" id="srch" placeholder="Film, serial və ya aktyor...">
         <i class="fas fa-search" style="color: var(--main-blue); cursor:pointer;" onclick="performSearch()"></i>
+        <div id="searchDropdown"></div>
     </div>
 </header>
 
@@ -154,16 +181,16 @@
     <main>
         <div id="favSection" style="display:none;">
             <div class="grid-header"><i class="fas fa-heart" style="color:#ff4757"></i> SEVİMLİLƏR</div>
-            <div class="top-slider" id="favList" style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;"></div>
+            <div class="top-slider" id="favList"></div>
         </div>
 
         <div id="historySection" style="display:none;">
             <div class="grid-header"><i class="fas fa-history" style="color:var(--main-blue)"></i> İZLƏMƏYƏ DAVAM ET</div>
-            <div class="top-slider" id="historyList" style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;"></div>
+            <div class="top-slider" id="historyList"></div>
         </div>
 
         <div class="grid-header"><i class="fas fa-star" style="color:#f5c518"></i> BU HƏFTƏ TRENDDƏ</div>
-        <div class="top-slider" id="topSlider" style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;"></div>
+        <div class="top-slider" id="topSlider"></div>
 
         <div class="grid-header"><i class="fas fa-calendar-alt"></i> TEZLİKLƏ</div>
         <div id="upcomingList" style="display:flex; gap:20px; overflow-x:auto; padding:10px 0;"></div>
@@ -288,13 +315,73 @@
 
     function loadNextPage() { currentPage++; loadMain(currentPath, currentQuery, '', true); }
 
+    // Canlı Axtarış Dropdown Məntiqi
+    const searchInput = document.getElementById('srch');
+    const searchDropdown = document.getElementById('searchDropdown');
+
+    searchInput.addEventListener('input', async (e) => {
+        const query = e.target.value;
+        if (query.length < 2) {
+            searchDropdown.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${KEY}&language=tr-TR&query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            if (data.results.length > 0) {
+                searchDropdown.innerHTML = data.results.slice(0, 8).map(m => `
+                    <div class="search-item" onclick="openP(${m.id}, '${m.media_type || (m.title ? 'movie' : 'tv')}')">
+                        <img src="${m.poster_path ? IMG + m.poster_path : 'https://via.placeholder.com/45x65'}">
+                        <div>
+                            <div style="font-size:14px; font-weight:600; color:#fff;">${m.title || m.name}</div>
+                            <div style="font-size:12px; color:#888;">${m.release_date ? m.release_date.split('-')[0] : ''}</div>
+                        </div>
+                    </div>`).join('');
+                searchDropdown.style.display = 'block';
+            } else {
+                searchDropdown.style.display = 'none';
+            }
+        } catch (err) { console.error(err); }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-box')) searchDropdown.style.display = 'none';
+    });
+
+    function closeP() { 
+        document.getElementById('modal').style.display = 'none'; 
+        document.getElementById('ifr').src = ''; 
+        document.body.style.overflow = 'auto';
+    }
+    
+    function performSearch() {
+        const v = document.getElementById('srch').value;
+        if(v) {
+            searchDropdown.style.display = 'none';
+            loadMain('/search/multi', `&query=${encodeURIComponent(v)}`, `Axtarış nəticəsi: ${v}`);
+        }
+    }
+
+    async function translateText(text) {
+        if(!text) return "Açıqlama tapılmadı.";
+        try {
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=az&dt=t&q=${encodeURIComponent(text)}`);
+            const data = await res.json();
+            return data[0].map(s => s[0]).join('');
+        } catch(e) { return text; }
+    }
+
     async function openP(id, type) {
+        searchDropdown.style.display = 'none';
         curID = id; curType = type; curS = 1; curEp = 1;
         const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits`);
         const m = await res.json();
         
         document.getElementById('mT').innerText = m.title || m.name;
-        document.getElementById('mD').innerText = m.overview || "Məlumat tapılmadı.";
+        document.getElementById('mD').innerText = await translateText(m.overview);
+
         document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `
             <div style="text-align:center; min-width:100px;">
                 <img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/100'}" style="width:80px; height:80px; border-radius:15px; object-fit:cover; border:1px solid rgba(255,255,255,0.1);">
@@ -318,7 +405,7 @@
         document.body.style.overflow = 'hidden';
     }
 
-    // --- 359-cu sətirdən sonrasını tam bərpa edən hissə ---
+    // Tarixçə, Favorit, Şərh və digər API funksiyaları (Olduğu kimi saxlanıldı)
     function addToHistory(m, type) {
         let history = JSON.parse(localStorage.getItem('x_hist') || '[]');
         history = history.filter(h => h.id !== m.id);
@@ -341,30 +428,36 @@
     }
 
     async function loadSlider() {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `
-            <div class="slide-card" onclick="openP(${m.id}, 'movie')">
-                <img src="${IMG + m.backdrop_path}">
-                <div class="slide-meta"><b>${m.title}</b></div>
-            </div>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `
+                <div class="slide-card" onclick="openP(${m.id}, 'movie')">
+                    <img src="${IMG + m.backdrop_path}">
+                    <div class="slide-meta"><b>${m.title}</b></div>
+                </div>`).join('');
+        } catch(e) { console.error(e); }
     }
 
     async function loadUpcoming() {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `
-            <div style="text-align:center; min-width:100px; cursor:pointer;" onclick="openP(${m.id}, 'movie')">
-                <img src="${IMG + m.poster_path}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--main-purple);">
-                <p style="font-size:11px; margin-top:10px; font-weight:bold;">${m.title}</p>
-            </div>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `
+                <div style="text-align:center; min-width:100px; cursor:pointer;" onclick="openP(${m.id}, 'movie')">
+                    <img src="${IMG + m.poster_path}" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--main-purple);">
+                    <p style="font-size:11px; margin-top:10px; font-weight:bold;">${m.title}</p>
+                </div>`).join('');
+        } catch(e) { console.error(e); }
     }
 
     async function loadGenres() {
-        const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('sideGenres').innerHTML = data.genres.slice(0, 12).map(g => `
-            <div class="server-btn" style="padding:8px; font-size:11px; text-align:center;" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('sideGenres').innerHTML = data.genres.slice(0, 12).map(g => `
+                <div class="server-btn" style="padding:8px; font-size:11px; text-align:center;" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+        } catch(e) { console.error(e); }
     }
 
     function loadSideNet() {
@@ -377,9 +470,11 @@
     }
 
     async function updateEpisodes(s, id) {
-        const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+        } catch(e) { console.error(e); }
     }
 
     function updateTV() {
@@ -389,75 +484,6 @@
         autoSetSource();
     }
 
-    function closeP() { 
-        document.getElementById('modal').style.display = 'none'; 
-        document.getElementById('ifr').src = ''; 
-        document.body.style.overflow = 'auto';
-    }
-    
-    // Axtarış funksiyası düzəldildi
-    function performSearch() {
-        const v = document.getElementById('srch').value;
-        if(v) {
-            // Axtarış edərkən başlığı dəyişir və nəticələri gətirir
-            loadMain('/search/multi', `&query=${encodeURIComponent(v)}`, `Axtarış nəticəsi: ${v}`);
-        }
-    }
-
-    // Enter düyməsi ilə axtarış
-    document.getElementById('srch').onkeypress = (e) => { 
-        if(e.key === 'Enter') performSearch(); 
-    };
-
-    // Filmləri Azərbaycan dilinə tərcümə edən funksiya
-    async function translateText(text) {
-        if(!text) return "Açıqlama tapılmadı.";
-        try {
-            // Google Translate API vasitəsilə sürətli tərcümə
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=az&dt=t&q=${encodeURIComponent(text)}`);
-            const data = await res.json();
-            return data[0].map(s => s[0]).join('');
-        } catch(e) {
-            return text; // Xəta olsa orijinal mətni saxla
-        }
-    }
-
-    // openP funksiyası yeniləndi (Tərcümə əlavə olundu)
-    async function openP(id, type) {
-        curID = id; curType = type; curS = 1; curEp = 1;
-        const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits`);
-        const m = await res.json();
-        
-        document.getElementById('mT').innerText = m.title || m.name;
-        
-        // Açıqlamanı Azərbaycan dilinə çevirib göstərir
-        const azDescription = await translateText(m.overview);
-        document.getElementById('mD').innerText = azDescription;
-
-        document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `
-            <div style="text-align:center; min-width:100px;">
-                <img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/100'}" style="width:80px; height:80px; border-radius:15px; object-fit:cover; border:1px solid rgba(255,255,255,0.1);">
-                <p style="font-size:11px; margin-top:10px; color:#fff;">${c.name}</p>
-            </div>`).join('');
-
-        if (type === 'tv') { 
-            document.getElementById('tvControls').style.display = 'flex'; 
-            let sHtml = "";
-            for(let i=1; i<=m.number_of_seasons; i++) sHtml += `<option value="${i}">${i}. Sezon</option>`;
-            document.getElementById('seasonSel').innerHTML = sHtml;
-            updateEpisodes(1, id);
-        } else { 
-            document.getElementById('tvControls').style.display = 'none'; 
-        }
-
-        addToHistory(m, type);
-        loadComments(id);
-        autoSetSource();
-        document.getElementById('modal').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-
-    // Şərhlər və digər funksiyalar
     function addComment() {
         const user = document.getElementById('comUser').value || "Anonim";
         const text = document.getElementById('comText').value;
@@ -483,6 +509,7 @@
     }
 
     function getFavs() { return JSON.parse(localStorage.getItem('x_favs') || '[]'); }
+
     function toggleFav(e, id, title, img, type) {
         e.stopPropagation();
         let favs = getFavs();
