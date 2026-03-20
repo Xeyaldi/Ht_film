@@ -3,162 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xeyal Film Cenneti | Full HD İzlə</title>
+    <title>Xeyal Film | Full HD İzlə</title>
     
-    <meta property="og:title" content="Xeyal Film Cenneti">
-    <meta property="og:description" content="Full HD film və serial izləmə platforması">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <meta property="og:title" content="Xeyal Film">
+    <meta property="og:description" content="Netfliks tərzində mavi dilli film və serial izləmə platforması">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --neon-blue: #00d4ff;
-            --neon-purple: #9d00ff;
-            --bg: #050507;
+            --main-blue: #0088cc; /* Netfliks qırmızısı əvəzinə Mavi */
+            --dark-blue: #0a1f2e; /* Daha tünd mavi-qara arxa fon */
+            --card-bg: #102a3d;
+            --text-color: #eee;
+            --header-bg: rgba(0, 0, 0, 0.8);
         }
 
         body { 
-            background: var(--bg);
-            /* Arxa fonda yüngül hərəkətli rənglər (Glassmorphism üçün) */
-            background-image: radial-gradient(circle at 20% 30%, #1a1033 0%, transparent 40%),
-                              radial-gradient(circle at 80% 70%, #0d2233 0%, transparent 40%);
-            color: #eee; 
+            background: var(--dark-blue);
+            color: var(--text-color); 
             font-family: 'Poppins', sans-serif; 
             margin: 0; 
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        /* --- GLASSMORPHISM HEADER --- */
+        /* --- NETFLİKS STİLLİ HEADER --- */
         header {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: var(--header-bg);
             padding: 15px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--glass-border);
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: background 0.3s;
+        }
+        header.scrolled {
+            background: rgba(0, 0, 0, 0.95);
         }
         .logo {
-            font-family: 'Orbitron', sans-serif; font-size: 22px; color: var(--neon-blue); text-decoration: none;
-            display: flex; align-items: center; gap: 10px; text-shadow: 0 0 10px var(--neon-blue);
+            font-size: 26px;
+            color: var(--main-blue);
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--main-blue);
         }
 
         .search-box {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
             display: flex;
             align-items: center;
-            padding: 5px 20px;
+            padding: 5px 15px;
             transition: 0.3s;
         }
-        .search-box:focus-within { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
-        .search-box input { background: transparent; border: none; color: #fff; padding: 8px; outline: none; width: 180px; }
+        .search-box input { background: transparent; border: none; color: #fff; padding: 8px; outline: none; width: 200px; }
 
-        .container { display: flex; gap: 25px; padding: 25px 5%; flex-wrap: wrap; }
+        .container { display: flex; gap: 20px; padding: 25px 5%; flex-wrap: wrap; }
         main { flex: 3; min-width: 300px; }
         aside { flex: 1; min-width: 280px; }
 
-        /* --- ŞÜŞƏ KARTLAR --- */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
+        /* --- POSTER SLİDER (KATEQORİYA) --- */
+        .grid-header { font-size: 20px; margin-bottom: 20px; color: #fff; font-weight: 600; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+        
+        /* NETFLİKS STİLLİ FİLM KARTI */
+        .m-card { 
+            background: var(--card-bg); border-radius: 4px; overflow: hidden; position: relative; 
+            cursor: pointer; transition: 0.3s; border: 2px solid transparent; 
         }
+        .m-card:hover { 
+            transform: scale(1.1); /* Kartın böyüməsi effekti */
+            z-index: 10;
+            border-color: var(--main-blue);
+            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.5);
+        }
+        .m-card img { width: 100%; height: 230px; object-fit: cover; }
+        
+        .fav-btn { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 6px; border-radius: 50%; z-index: 5; }
+        .fav-active { color: #ff4757 !important; text-shadow: 0 0 10px #ff4757; }
 
-        .top-slider { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
-        .slide-card {
-            min-width: 240px; height: 140px; border-radius: 12px; position: relative; overflow: hidden;
-            border: 1px solid var(--glass-border); cursor: pointer; transition: 0.4s;
-        }
-        .slide-card:hover { transform: scale(1.05); border-color: var(--neon-blue); }
-        .slide-card img { width: 100%; height: 100%; object-fit: cover; }
-        .slide-meta { 
-            position: absolute; bottom: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 10px; font-size: 12px; color: #fff; 
-        }
+        .rating { position: absolute; top: 10px; right: 10px; background: var(--main-blue); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .info { padding: 10px; text-align: center; }
+        .info h4 { margin: 0; font-size: 13px; font-weight: 400; }
 
+        /* YAXINDA GƏLƏCƏK (DAİRƏ) */
+        .upcoming-circles { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
         .circle-item { text-align: center; min-width: 90px; cursor: pointer; }
         .circle-item img {
             width: 80px; height: 80px; border-radius: 50%; object-fit: cover; 
-            border: 2px solid var(--neon-purple); padding: 3px; transition: 0.3s;
+            border: 2px solid var(--main-blue); padding: 3px; transition: 0.3s;
         }
-        .circle-item:hover img { box-shadow: 0 0 20px var(--neon-purple); transform: rotate(5deg); }
+        .circle-item:hover img { box-shadow: 0 0 20px var(--main-blue); transform: rotate(5deg); }
 
-        .grid-header { font-size: 18px; margin-bottom: 20px; color: var(--neon-blue); font-weight: 600; letter-spacing: 1px; }
-        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 20px; }
-        
-        .m-card { 
-            background: var(--glass-bg); border-radius: 12px; overflow: hidden; position: relative; 
-            cursor: pointer; transition: 0.4s; border: 1px solid var(--glass-border); 
-        }
-        .m-card:hover { 
-            background: rgba(255,255,255,0.1); transform: translateY(-10px); 
-            border-color: var(--neon-blue); box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
-        .m-card img { width: 100%; height: 250px; object-fit: cover; }
-        
-        .fav-btn { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.5); color: #fff; padding: 7px; border-radius: 50%; z-index: 5; }
-        .fav-active { color: #ff4757 !important; text-shadow: 0 0 10px #ff4757; }
+        /* --- NETFLİKS STİLLİ MODAL --- */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 2000; padding: 20px; overflow-y: auto; }
+        .player-content { max-width: 1000px; margin: 30px auto; background: var(--card-bg); border-radius: 8px; padding: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        iframe { width: 100%; height: 500px; border-radius: 6px; border: 1px solid var(--main-blue); background: #000; }
 
-        .rating { position: absolute; top: 10px; right: 10px; background: var(--neon-blue); color: #000; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .info { padding: 12px; text-align: center; }
-        .info h4 { margin: 0; font-size: 13px; font-weight: 400; }
+        /* MODAL İDARƏETMƏ DÜYMƏLƏRİ */
+        .action-btns { display: flex; gap: 10px; margin: 20px 0; }
+        .btn-server { background: var(--main-blue); color: #000; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-trailer { background: #ff4757; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        /* --- MODAL GLASS --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; padding: 20px; overflow-y: auto; }
-        .player-content { max-width: 1000px; margin: 40px auto; background: rgba(20,20,25,0.9); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; }
-        iframe { width: 100%; height: 500px; border-radius: 15px; border: 1px solid var(--neon-blue); background: #000; }
+        /* SİDEBAR KARTLARI */
+        .side-block { background: var(--card-bg); border-radius: 6px; padding: 15px; margin-bottom: 20px; border-left: 3px solid var(--main-blue); }
+        .genre-btn { background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 5px; font-size: 12px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; margin-bottom: 6px; text-align: center; }
+        .genre-btn:hover { background: rgba(0, 136, 204, 0.2); border-color: var(--main-blue); }
 
-        .genre-btn { background: var(--glass-bg); padding: 10px; border-radius: 10px; font-size: 13px; cursor: pointer; transition: 0.3s; border: 1px solid var(--glass-border); margin-bottom: 8px; text-align: center; }
-        .genre-btn:hover { background: var(--neon-purple); border-color: #fff; }
-
-        .comment-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--glass-border); }
-        
-        .btn-server1 { background: var(--neon-blue); color: #000; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-trailer { background: #ff4757; color: #fff; padding: 12px 25px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-left: 10px; }
+        .comment-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 5px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
 
         @media (max-width: 768px) { aside { display: none; } .container { padding: 15px; } iframe { height: 280px; } }
     </style>
 </head>
 <body>
 
-<header>
-    <a href="javascript:location.reload()" class="logo"><i class="fas fa-play-circle"></i> XEYAL FİLM</a>
+<header id="navbar">
+    <a href="javascript:location.reload()" class="logo">XEYAL FİLM</a>
     <div class="search-box">
-        <input type="text" id="srch" placeholder="Film və ya serial axtar...">
-        <i class="fas fa-search" style="color: var(--neon-blue); cursor:pointer;" onclick="performSearch()"></i>
+        <input type="text" id="srch" placeholder="Film, serial axtar...">
+        <i class="fas fa-search" style="color: var(--main-blue); cursor:pointer;" onclick="performSearch()"></i>
     </div>
 </header>
 
 <div class="container">
     <main>
-        <div id="favSection" style="display:none;">
+        <div id="favSection" style="display:none; margin-bottom: 25px;">
             <div class="grid-header">❤️ SEVİMLİ FİLMLƏRİNİZ</div>
-            <div class="top-slider glass-panel" id="favList"></div>
+            <div class="upcoming-circles" id="favList"></div>
         </div>
 
-        <div id="historySection" style="display:none;">
+        <div id="historySection" style="display:none; margin-bottom: 25px;">
             <div class="grid-header">🕒 SON BAXDIQLARINIZ</div>
-            <div class="top-slider glass-panel" id="historyList"></div>
+            <div class="upcoming-circles" id="historyList"></div>
         </div>
 
         <div class="grid-header">⭐ POPULYAR FİLMLƏR</div>
-        <div class="top-slider glass-panel" id="topSlider"></div>
+        <div class="upcoming-circles" id="topSlider"></div>
 
         <div class="upcoming-section">
             <div class="grid-header">🎬 YAXINDA GƏLƏCƏK</div>
-            <div class="upcoming-circles glass-panel" id="upcomingList" style="display:flex; gap:15px; overflow-x:auto;"></div>
+            <div class="upcoming-circles" id="upcomingList"></div>
         </div>
 
         <div class="grid-header" id="mainTitle">🔥 SON ƏLAVƏ OLUNANLAR</div>
@@ -166,17 +154,17 @@
     </main>
 
     <aside>
-        <div class="glass-panel" style="background: rgba(217, 35, 35, 0.2); border-color: #d92323; cursor:pointer; text-align:center; font-weight:bold;" onclick="randomMovie()">
+        <div class="side-block" style="background: rgba(217, 35, 35, 0.1); border-color: #d92323; cursor:pointer; text-align:center; font-weight:bold;" onclick="randomMovie()">
             <i class="fas fa-robot"></i> FİLM ROBOTU
         </div>
         
-        <div class="glass-panel">
-            <div class="grid-header" style="font-size:14px;">📊 TRENDDƏ OLANLAR</div>
+        <div class="side-block">
+            <div class="grid-header" style="font-size:14px; margin-bottom:10px;">📊 TRENDDƏ OLANLAR</div>
             <div id="sideNet" style="font-size: 13px; line-height: 2.2;">Yüklənir...</div>
         </div>
 
-        <div class="glass-panel">
-            <div class="grid-header" style="font-size:14px;">🎭 KATEQORİYALAR</div>
+        <div class="side-block">
+            <div class="grid-header" style="font-size:14px; margin-bottom:10px;">🎭 KATEQORİYALAR</div>
             <div class="genre-list" id="sideGenres"></div>
         </div>
     </aside>
@@ -187,46 +175,52 @@
         <span onclick="closeP()" style="color: #fff; font-size: 40px; cursor: pointer; float: right; margin-top:-20px;">&times;</span>
         <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
         
-        <div id="tvControls" class="glass-panel" style="display:none; margin-top:15px; gap:10px;">
-            Sezon: <select id="seasonSel" onchange="updateTV()" style="background:#222; color:#fff; padding:5px; border-radius:5px;"></select>
-            Bölüm: <select id="episodeSel" onchange="updateTV()" style="background:#222; color:#fff; padding:5px; border-radius:5px;"></select>
+        <div id="tvControls" class="glass-panel" style="display:none; margin-top:15px; gap:10px; padding:10px; background:rgba(0,0,0,0.5);">
+            Sezon: <select id="seasonSel" onchange="updateTV()" style="background:#222; color:#fff; padding:5px; border-radius:3px; border:1px solid rgba(255,255,255,0.2);"></select>
+            Bölüm: <select id="episodeSel" onchange="updateTV()" style="background:#222; color:#fff; padding:5px; border-radius:3px; border:1px solid rgba(255,255,255,0.2);"></select>
         </div>
 
         <div style="margin-top: 20px;">
-            <h2 id="mT" style="color: var(--neon-blue); margin-bottom:10px;"></h2>
+            <h2 id="mT" style="color: var(--main-blue); margin-bottom:10px;"></h2>
             <p id="mD" style="font-size: 14px; color: #bbb; line-height: 1.6;"></p>
             
-            <div style="margin: 20px 0;">
-                <button class="btn-server1" onclick="setS(1)">Server 1</button>
-                <button class="btn-server1" style="background:var(--neon-purple); color:#fff; margin-left:10px;" onclick="setS(2)">Server 2</button>
+            <div class="action-btns">
+                <button class="btn-server" onclick="setS(1)">Server 1</button>
+                <button class="btn-server" style="background:var(--main-blue); opacity:0.7;" onclick="setS(2)">Server 2</button>
                 <button class="btn-trailer" id="btnTrailer" onclick="openTrailer()">🎬 Fragman</button>
             </div>
 
-            <h4 style="color:var(--neon-purple); margin-bottom:10px;">AKTYORLAR</h4>
+            <h4 style="color:var(--main-blue); margin-bottom:10px;">AKTYORLAR</h4>
             <div id="mCast" style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;"></div>
 
             <div class="comment-section">
-                <h4 style="color: var(--neon-blue);">FİKİRLƏRİNİZ</h4>
-                <input type="text" id="comUser" placeholder="Adınız..." style="background:var(--glass-bg); border:1px solid var(--glass-border); color:#fff; padding:10px; border-radius:8px; width:200px; margin-bottom:10px;">
-                <textarea id="comText" placeholder="Şərhinizi bura yazın..." style="background:var(--glass-bg); border:1px solid var(--glass-border); color:#fff; padding:10px; border-radius:8px; width:100%; height:80px; outline:none;"></textarea>
-                <button class="comment-btn" style="margin-top:10px; background:var(--neon-blue); border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="addComment()">Şərhi Göndər</button>
+                <h4 style="color: var(--main-blue);">FİKİRLƏRİNİZ</h4>
+                <input type="text" id="comUser" placeholder="Adınız..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:10px; border-radius:4px; width:200px; margin-bottom:10px;">
+                <textarea id="comText" placeholder="Şərhinizi bura yazın..." style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:10px; border-radius:4px; width:100%; height:80px; outline:none; resize:none;"></textarea>
+                <button class="comment-btn" style="margin-top:10px; background:var(--main-blue); border:none; padding:10px 20px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="addComment()">Şərhi Göndər</button>
                 <div id="comList" style="margin-top:20px;"></div>
             </div>
 
-            <h4 style="color:var(--neon-blue); margin-top:30px;">OXŞAR TƏKLİFLƏR</h4>
-            <div class="top-slider" id="mRecs"></div>
+            <h4 style="color:var(--main-blue); margin-top:30px;">OXŞAR TƏKLİFLƏR</h4>
+            <div class="upcoming-circles" id="mRecs"></div>
         </div>
     </div>
 </div>
 
 <script>
     const KEY = 'c972e47d1574ac86dfe1d93d7e4a0b35';
-    const IMG = 'https://image.tmdb.org/p/w500';
+    const IMG = 'https://image.tmdb.org/t/p/w500';
     let curID, curType, curS = 1, curEp = 1, curTrailer = "";
 
     window.onload = () => {
         loadSlider(); loadUpcoming(); loadMain('/trending/all/day');
         loadGenres(); loadHistory(); loadFavorites(); loadSideNet();
+    };
+
+    window.onscroll = () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
     };
 
     async function loadMain(path, query = '', title = '🔥 SON ƏLAVƏ OLUNANLAR') {
@@ -264,14 +258,14 @@
 
         document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `
             <div style="text-align:center; min-width:80px;">
-                <img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/80'}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid var(--glass-border);">
+                <img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/80'}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.1);">
                 <p style="font-size:10px; margin-top:5px;">${c.name}</p>
             </div>`).join('');
 
         document.getElementById('mRecs').innerHTML = m.recommendations.results.slice(0, 10).map(r => `
-            <div class="slide-card" onclick="openP(${r.id}, '${type}')">
+            <div class="m-card" style="min-width:140px; scroll-snap-align:start;" onclick="openP(${r.id}, '${type}')">
                 <img src="${IMG + (r.backdrop_path || r.poster_path)}">
-                <div class="slide-meta">${r.title || r.name}</div>
+                <div class="info"><h4>${r.title || r.name}</h4></div>
             </div>`).join('');
 
         if (type === 'tv') { document.getElementById('tvControls').style.display = 'flex'; setupTV(m); } 
@@ -325,7 +319,7 @@
         const sec = document.getElementById('favSection');
         if(favs.length > 0) {
             sec.style.display = 'block';
-            document.getElementById('favList').innerHTML = favs.map(f => `<div class="slide-card" onclick="openP(${f.id}, '${f.type}')"><img src="${IMG + f.img}"><div class="slide-meta">${f.title}</div></div>`).join('');
+            document.getElementById('favList').innerHTML = favs.map(f => `<div class="m-card" style="min-width:140px;" onclick="openP(${f.id}, '${f.type}')"><img src="${IMG + f.img}"> <div class="info"><h4>${f.title}</h4></div></div>`).join('');
         } else sec.style.display = 'none';
     }
 
@@ -341,13 +335,13 @@
         const hist = JSON.parse(localStorage.getItem('x_hist') || '[]');
         if(hist.length > 0) {
             document.getElementById('historySection').style.display = 'block';
-            document.getElementById('historyList').innerHTML = hist.map(h => `<div class="slide-card" onclick="openP(${h.id}, '${h.type}')"><img src="${IMG + h.img}"><div class="slide-meta">${h.title}</div></div>`).join('');
+            document.getElementById('historyList').innerHTML = hist.map(h => `<div class="m-card" style="min-width:140px;" onclick="openP(${h.id}, '${h.type}')"><img src="${IMG + h.img}"> <div class="info"><h4>${h.title}</h4></div></div>`).join('');
         }
     }
     async function loadSlider() {
         const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${KEY}&language=tr-TR`);
         const data = await res.json();
-        document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `<div class="slide-card" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.backdrop_path}"><div class="slide-meta">⭐ ${m.vote_average.toFixed(1)} | ${m.title}</div></div>`).join('');
+        document.getElementById('topSlider').innerHTML = data.results.slice(0, 10).map(m => `<div class="m-card" style="min-width:140px;" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.backdrop_path}"><div class="info"><h4>${m.title}</h4></div></div>`).join('');
     }
     async function loadUpcoming() {
         const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
@@ -358,26 +352,12 @@
         const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
         const data = await res.json();
         const list = document.getElementById('sideGenres');
-        list.innerHTML = `<div class="genre-btn" style="background:rgba(217,35,35,0.4); border-color:#d92323;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
+        list.innerHTML = `<div class="genre-btn" style="background:rgba(217,35,35,0.1); border-color:#d92323;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
         list.innerHTML += data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
     }
     function loadSideNet() {
         fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${KEY}`).then(r => r.json()).then(d => {
-                document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map(m => `<div>• ${m.title || m.name}</div>`).join('');
-        });
-    }
-
-    function setupTV(m) {
-        const sSel = document.getElementById('seasonSel');
-        sSel.innerHTML = '';
-        for(let i=1; i<=m.number_of_seasons; i++) sSel.innerHTML += `<option value="${i}">${i}. Sezon</option>`;
-        updateEpisodes(1, m.id);
-    }
-
-    async function updateEpisodes(s, id) {
-        const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+                    document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
     }
 
     function updateTV() {
