@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xeyal Film Cenneti | Full HD İzle</title>
+    <meta name="description" content="Xeyal Film Cenneti - Ən son film və serialları tam ödənişsiz və Full HD keyfiyyətdə izləyin.">
+    <meta name="keywords" content="film izle, serial izle, azərbaycan dilində filmlər, hd film">
     
     <meta property="og:title" content="Xeyal Film Cenneti">
     <meta property="og:description" content="Full HD film və serial izləmə platforması">
@@ -97,16 +99,22 @@
         .player-content { max-width: 1000px; margin: auto; }
         iframe { width: 100%; height: 500px; border: 2px solid var(--neon-blue); border-radius: 8px; background: #000; }
 
-        .tv-controls { display: none; gap: 10px; margin: 15px 0; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; }
+        .tv-controls { display: none; gap: 10px; margin: 15px 0; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #333; align-items: center; }
         .tv-controls select { background: #222; color: #fff; border: 1px solid var(--neon-blue); padding: 8px; border-radius: 4px; }
 
-        .action-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .action-btns button { padding: 10px 20px; cursor: pointer; border: none; font-weight: bold; border-radius: 4px; }
-        .btn-server1 { background: var(--neon-blue); color: #000; }
-        .btn-server2 { background: var(--neon-purple); color: #fff; }
-        .btn-trailer { background: #ff4757; color: #fff; }
+        .action-btns { display: flex; gap: 10px; margin-top: 20px; align-items: center; }
+        .watch-label { color: var(--neon-blue); font-weight: bold; font-family: 'Orbitron'; font-size: 18px; text-transform: uppercase; }
+        .btn-trailer { background: #ff4757; color: #fff; padding: 10px 20px; cursor: pointer; border: none; font-weight: bold; border-radius: 4px; }
 
-        @media (max-width: 768px) { aside { display: none; } .container { padding: 10px; } iframe { height: 250px; } }
+        .load-more { text-align: center; margin: 30px 0; }
+        .load-more button { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 10px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .load-more button:hover { background: var(--neon-blue); color: #000; }
+
+        @media (max-width: 768px) { 
+            aside { width: 100%; display: block; } 
+            .container { padding: 10px; } 
+            iframe { height: 250px; } 
+        }
     </style>
 </head>
 <body>
@@ -139,7 +147,12 @@
         </div>
 
         <div class="grid-header" id="mainTitle">🔥 SON ƏLAVƏ OLUNANLAR</div>
-        <div class="movie-grid" id="mainGrid"></div>
+        <div class="movie-grid" id="mainGrid">
+            <p id="loadingTxt">Filmlər yüklənir...</p>
+        </div>
+        <div class="load-more" id="loadMoreArea">
+            <button onclick="loadNextPage()">DAHA ÇOX YÜKLƏ</button>
+        </div>
     </main>
 
     <aside>
@@ -157,7 +170,13 @@
 
 <div id="modal" class="modal">
     <div class="player-content">
-        <span onclick="closeP()" style="color: #fff; font-size: 40px; cursor: pointer; float: right;">&times;</span>
+        <span onclick="closeP()" style="color: #fff; font-size: 40px; cursor: pointer; float: right;">×</span>
+        
+        <div class="action-btns" style="margin-bottom: 10px;">
+            <span class="watch-label"><i class="fas fa-play-circle"></i> FİLMİ İZLƏ</span>
+            <button class="btn-trailer" id="btnTrailer" onclick="openTrailer()">🎬 Fragman</button>
+        </div>
+
         <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
         
         <div class="tv-controls" id="tvControls">
@@ -171,12 +190,6 @@
             
             <h4 style="color:var(--neon-purple); margin-top:20px;">AKTYORLAR</h4>
             <div class="cast-list" id="mCast"></div>
-
-            <div class="action-btns">
-                <button class="btn-server1" onclick="setS(1)">Server 1</button>
-                <button class="btn-server2" onclick="setS(2)">Server 2</button>
-                <button class="btn-trailer" id="btnTrailer" onclick="openTrailer()">🎬 Fragman</button>
-            </div>
 
             <div class="comment-section">
                 <h4 style="color: var(--neon-blue);">ŞƏRHLƏR</h4>
@@ -196,64 +209,78 @@
     const KEY = 'c972e47d1574ac86dfe1d93d7e4a0b35';
     const IMG = 'https://image.tmdb.org/t/p/w500';
     let curID, curType, curS = 1, curEp = 1, curTrailer = "";
+    let currentPage = 1, currentPath = '/trending/all/day', currentQuery = '';
 
     window.onload = () => {
         loadSlider(); loadUpcoming(); loadMain('/trending/all/day');
         loadGenres(); loadHistory(); loadFavorites(); loadSideNet();
     };
 
-    async function loadMain(path, query = '', title = '🔥 SON ƏLAVƏ OLUNANLAR') {
+    async function loadMain(path, query = '', title = '🔥 SON ƏLAVƏ OLUNANLAR', append = false) {
+        currentPath = path; currentQuery = query;
         const grid = document.getElementById('mainGrid');
-        document.getElementById('mainTitle').innerText = title;
-        const res = await fetch(`https://api.themoviedb.org/3${path}?api_key=${KEY}&language=tr-TR${query}`);
-        const data = await res.json();
-        grid.innerHTML = '';
-        data.results.forEach(m => {
-            if(!m.poster_path) return;
-            const isFav = getFavs().some(f => f.id === m.id);
-            const card = document.createElement('div');
-            card.className = 'm-card';
-            card.innerHTML = `
-                <i class="fas fa-heart fav-btn ${isFav ? 'fav-active' : ''}" onclick="toggleFav(event, ${m.id}, '${m.title || m.name}', '${m.poster_path}', '${m.media_type || 'movie'}')"></i>
-                <div class="rating">IMDB ${m.vote_average.toFixed(1)}</div>
-                <img src="${IMG + m.poster_path}">
-                <div class="info"><h4>${m.title || m.name}</h4></div>`;
-            card.onclick = () => openP(m.id, m.media_type || (m.title ? 'movie' : 'tv'));
-            grid.appendChild(card);
-        });
+        const loading = document.getElementById('loadingTxt');
+        if(!append) { grid.innerHTML = ''; document.getElementById('mainTitle').innerText = title; currentPage = 1; }
+        
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3${path}?api_key=${KEY}&language=tr-TR${query}&page=${currentPage}`);
+            const data = await res.json();
+            if(loading) loading.remove();
+            
+            data.results.forEach(m => {
+                if(!m.poster_path) return;
+                const isFav = getFavs().some(f => f.id === m.id);
+                const card = document.createElement('div');
+                card.className = 'm-card';
+                card.innerHTML = `
+                    <i class="fas fa-heart fav-btn ${isFav ? 'fav-active' : ''}" onclick="toggleFav(event, ${m.id}, '${m.title || m.name}', '${m.poster_path}', '${m.media_type || 'movie'}')"></i>
+                    <div class="rating">IMDB ${m.vote_average.toFixed(1)}</div>
+                    <img src="${IMG + m.poster_path}" loading="lazy">
+                    <div class="info"><h4>${m.title || m.name}</h4></div>`;
+                card.onclick = () => openP(m.id, m.media_type || (m.title ? 'movie' : 'tv'));
+                grid.appendChild(card);
+            });
+        } catch(err) { console.error("API Xətası:", err); }
+    }
+
+    function loadNextPage() {
+        currentPage++;
+        loadMain(currentPath, currentQuery, '', true);
     }
 
     async function openP(id, type) {
-        curID = id; curType = type;
+        curID = id; curType = type; curS = 1; curEp = 1;
         const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits,recommendations,videos`);
         const m = await res.json();
         
         document.getElementById('mT').innerText = m.title || m.name;
         document.getElementById('mD').innerText = m.overview || "Məlumat tapılmadı.";
         
-        // Fragman tapmaq
-        const trailer = m.videos.results.find(v => v.type === 'Trailer');
+        const trailer = m.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         curTrailer = trailer ? `https://www.youtube.com/embed/${trailer.key}` : "";
         document.getElementById('btnTrailer').style.display = curTrailer ? "block" : "none";
 
-        // Cast & Recs
         document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `<div class="cast-item"><img src="${c.profile_path ? IMG + c.profile_path : 'https://via.placeholder.com/60'}"><p>${c.name}</p></div>`).join('');
         document.getElementById('mRecs').innerHTML = m.recommendations.results.slice(0, 10).map(r => `<div class="slide-card" onclick="openP(${r.id}, '${type}')"><img src="${IMG + (r.backdrop_path || r.poster_path)}"><div class="slide-meta">${r.title || r.name}</div></div>`).join('');
 
-        if (type === 'tv') { document.getElementById('tvControls').style.display = 'flex'; setupTV(m); } 
-        else { document.getElementById('tvControls').style.display = 'none'; }
+        if (type === 'tv') { 
+            document.getElementById('tvControls').style.display = 'flex'; 
+            setupTV(m); 
+        } else { 
+            document.getElementById('tvControls').style.display = 'none'; 
+        }
 
         addToHistory(m, type);
         loadComments(id);
-        setS(1);
+        autoSetSource();
         document.getElementById('modal').style.display = 'block';
     }
 
     function openTrailer() { if(curTrailer) document.getElementById('ifr').src = curTrailer; }
 
-    function setS(s) {
-        const b = s === 1 ? 'https://vidsrc.to/embed' : 'https://vidsrc.xyz/embed';
-        document.getElementById('ifr').src = curType === 'movie' ? `${b}/movie/${curID}` : `${b}/tv/${curID}/${curS}/${curEp}`;
+    function autoSetSource() {
+        const baseUrl = 'https://vidsrc.to/embed';
+        document.getElementById('ifr').src = curType === 'movie' ? `${baseUrl}/movie/${curID}` : `${baseUrl}/tv/${curID}/${curS}/${curEp}`;
     }
 
     function addComment() {
@@ -295,7 +322,8 @@
         } else sec.style.display = 'none';
     }
 
-    function randomMovie() { openP(Math.floor(Math.random() * 500) + 100, 'movie'); }
+    function randomMovie() { loadMain('/movie/top_rated', '', '🤖 ROBOTUN SEÇİMİ'); }
+    
     function addToHistory(m, type) {
         let history = JSON.parse(localStorage.getItem('x_hist') || '[]');
         history = history.filter(h => h.id !== m.id);
@@ -320,35 +348,44 @@
         const data = await res.json();
         document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `<div class="circle-item" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.poster_path}"><p>${m.title}</p></div>`).join('');
     }
-    async function loadGenres() {
+        async function loadGenres() {
         const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
         const data = await res.json();
         const list = document.getElementById('sideGenres');
         list.innerHTML = `<div class="genre-btn" style="background:#d92323; font-weight:bold;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
         list.innerHTML += data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
     }
+
     function loadSideNet() {
         fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`).then(r => r.json()).then(d => {
             document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map(m => `<div>• ${m.title}</div>`).join('');
         });
     }
+
     function setupTV(m) {
         const sSel = document.getElementById('seasonSel');
         sSel.innerHTML = '';
         for(let i=1; i<=m.number_of_seasons; i++) sSel.innerHTML += `<option value="${i}">${i}. Sezon</option>`;
         updateEpisodes(1, m.id);
     }
+
     async function updateEpisodes(s, id) {
         const res = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${s}?api_key=${KEY}&language=tr-TR`);
         const data = await res.json();
-           document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
+        document.getElementById('episodeSel').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">${e.episode_number}. Bölüm</option>`).join('');
     }
 
     function updateTV() {
         curS = document.getElementById('seasonSel').value;
         curEp = document.getElementById('episodeSel').value;
         if(event.target.id === 'seasonSel') updateEpisodes(curS, curID);
-        setS(1);
+        autoSetSource();
+    }
+
+    function autoSetSource() {
+        // "Server" yazısı olmadan birbaşa mənbəni təyin edir
+        const baseUrl = 'https://vidsrc.to/embed';
+        document.getElementById('ifr').src = curType === 'movie' ? `${baseUrl}/movie/${curID}` : `${baseUrl}/tv/${curID}/${curS}/${curEp}`;
     }
 
     function closeP() { 
@@ -361,9 +398,21 @@
         if(v) loadMain('/search/multi', `&query=${encodeURIComponent(v)}`, `Nəticə: ${v}`);
     }
 
+    // Gündüz-Gecə rejimi funksiyası
+    function toggleMode() {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+
     document.getElementById('srch').onkeypress = (e) => { 
         if(e.key === 'Enter') performSearch(); 
     };
+
+    // Səhifə yüklənəndə yaddaşdakı rejimi yoxla
+    if(localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
 </script>
 </body>
 </html>
