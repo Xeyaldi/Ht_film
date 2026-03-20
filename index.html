@@ -106,6 +106,11 @@
         .watch-label { color: var(--neon-blue); font-weight: bold; font-family: 'Orbitron'; font-size: 18px; text-transform: uppercase; }
         .btn-trailer { background: #ff4757; color: #fff; padding: 10px 20px; cursor: pointer; border: none; font-weight: bold; border-radius: 4px; }
 
+        /* Yeni: Donmanı önləmək üçün server seçimi */
+        .server-box { display: flex; gap: 10px; margin: 10px 0; }
+        .s-btn { background: #222; color: #fff; border: 1px solid #444; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .s-btn.active { border-color: var(--neon-blue); background: #003a4a; }
+
         .load-more { text-align: center; margin: 30px 0; }
         .load-more button { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 10px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .load-more button:hover { background: var(--neon-blue); color: #000; }
@@ -177,6 +182,12 @@
             <button class="btn-trailer" id="btnTrailer" onclick="openTrailer()">🎬 Fragman</button>
         </div>
 
+        <div class="server-box">
+            <button class="s-btn active" onclick="setServer('vidsrc', this)">Server 1</button>
+            <button class="s-btn" onclick="setServer('vidsrcme', this)">Server 2</button>
+            <button class="s-btn" onclick="setServer('embed', this)">Server 3 (Alternativ)</button>
+        </div>
+
         <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
         
         <div class="tv-controls" id="tvControls">
@@ -210,11 +221,33 @@
     const IMG = 'https://image.tmdb.org/t/p/w500';
     let curID, curType, curS = 1, curEp = 1, curTrailer = "";
     let currentPage = 1, currentPath = '/trending/all/day', currentQuery = '';
+    let currentServer = 'vidsrc';
 
     window.onload = () => {
         loadSlider(); loadUpcoming(); loadMain('/trending/all/day');
         loadGenres(); loadHistory(); loadFavorites(); loadSideNet();
     };
+
+    // --- Yenilənmiş Server Məntiqi ---
+    function setServer(srv, btn) {
+        currentServer = srv;
+        document.querySelectorAll('.s-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        autoSetSource();
+    }
+
+    function autoSetSource() {
+        let src = "";
+        if(currentServer === 'vidsrc') {
+            src = curType === 'movie' ? `https://vidsrc.to/embed/movie/${curID}` : `https://vidsrc.to/embed/tv/${curID}/${curS}/${curEp}`;
+        } else if(currentServer === 'vidsrcme') {
+            src = curType === 'movie' ? `https://vidsrc.me/embed/movie?tmdb=${curID}` : `https://vidsrc.me/embed/tv?tmdb=${curID}&sea=${curS}&epi=${curEp}`;
+        } else {
+            src = curType === 'movie' ? `https://multiembed.mov/?video_id=${curID}&tmdb=1` : `https://multiembed.mov/?video_id=${curID}&tmdb=1&s=${curS}&e=${curEp}`;
+        }
+        document.getElementById('ifr').src = src;
+    }
+    // ----------------------------
 
     async function loadMain(path, query = '', title = '🔥 SON ƏLAVƏ OLUNANLAR', append = false) {
         currentPath = path; currentQuery = query;
@@ -278,11 +311,6 @@
 
     function openTrailer() { if(curTrailer) document.getElementById('ifr').src = curTrailer; }
 
-    function autoSetSource() {
-        const baseUrl = 'https://vidsrc.to/embed';
-        document.getElementById('ifr').src = curType === 'movie' ? `${baseUrl}/movie/${curID}` : `${baseUrl}/tv/${curID}/${curS}/${curEp}`;
-    }
-
     function addComment() {
         const user = document.getElementById('comUser').value || "Anonim";
         const text = document.getElementById('comText').value;
@@ -331,35 +359,50 @@
         localStorage.setItem('x_hist', JSON.stringify(history.slice(0, 10)));
         loadHistory();
     }
+
     function loadHistory() {
         const hist = JSON.parse(localStorage.getItem('x_hist') || '[]');
+        const sec = document.getElementById('historySection');
         if(hist.length > 0) {
-            document.getElementById('historySection').style.display = 'block';
+            sec.style.display = 'block';
             document.getElementById('historyList').innerHTML = hist.map(h => `<div class="slide-card" onclick="openP(${h.id}, '${h.type}')"><img src="${IMG + h.img}"><div class="slide-meta">${h.title}</div></div>`).join('');
+        } else {
+            sec.style.display = 'none';
         }
     }
+
     async function loadSlider() {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('topSlider').innerHTML = data.results.slice(0, 8).map(m => `<div class="slide-card" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.backdrop_path}"><div class="slide-meta">⭐ ${m.vote_average.toFixed(1)} | ${m.title}</div></div>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('topSlider').innerHTML = data.results.slice(0, 8).map(m => `<div class="slide-card" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.backdrop_path}"><div class="slide-meta">⭐ ${m.vote_average.toFixed(1)} | ${m.title}</div></div>`).join('');
+        } catch(e) { console.error("Slider xətası:", e); }
     }
+
     async function loadUpcoming() {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `<div class="circle-item" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.poster_path}"><p>${m.title}</p></div>`).join('');
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            document.getElementById('upcomingList').innerHTML = data.results.slice(0, 10).map(m => `<div class="circle-item" onclick="openP(${m.id}, 'movie')"><img src="${IMG + m.poster_path}"><p>${m.title}</p></div>`).join('');
+        } catch(e) { console.error("Upcoming xətası:", e); }
     }
-        async function loadGenres() {
-        const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        const list = document.getElementById('sideGenres');
-        list.innerHTML = `<div class="genre-btn" style="background:#d92323; font-weight:bold;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
-        list.innerHTML += data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+
+    async function loadGenres() {
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${KEY}&language=tr-TR`);
+            const data = await res.json();
+            const list = document.getElementById('sideGenres');
+            list.innerHTML = `<div class="genre-btn" style="background:#d92323; font-weight:bold;" onclick="loadMain('/discover/movie', '&with_original_language=tr', '🇹🇷 TÜRK FİLMLƏRİ')">TÜRK FİLMLƏRİ</div>`;
+            list.innerHTML += data.genres.slice(0, 14).map(g => `<div class="genre-btn" onclick="loadMain('/discover/movie', '&with_genres=${g.id}', '${g.name}')">${g.name}</div>`).join('');
+        } catch(e) { console.error("Janr xətası:", e); }
     }
 
     function loadSideNet() {
-        fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`).then(r => r.json()).then(d => {
-            document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map(m => `<div>• ${m.title}</div>`).join('');
-        });
+        fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${KEY}`)
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById('sideNet').innerHTML = d.results.slice(0, 5).map(m => `<div style="border-bottom: 1px solid #222; padding: 5px 0;">• ${m.title}</div>`).join('');
+            });
     }
 
     function setupTV(m) {
@@ -382,12 +425,6 @@
         autoSetSource();
     }
 
-    function autoSetSource() {
-        // "Server" yazısı olmadan birbaşa mənbəni təyin edir
-        const baseUrl = 'https://vidsrc.to/embed';
-        document.getElementById('ifr').src = curType === 'movie' ? `${baseUrl}/movie/${curID}` : `${baseUrl}/tv/${curID}/${curS}/${curEp}`;
-    }
-
     function closeP() { 
         document.getElementById('modal').style.display = 'none'; 
         document.getElementById('ifr').src = ''; 
@@ -398,21 +435,9 @@
         if(v) loadMain('/search/multi', `&query=${encodeURIComponent(v)}`, `Nəticə: ${v}`);
     }
 
-    // Gündüz-Gecə rejimi funksiyası
-    function toggleMode() {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    }
-
     document.getElementById('srch').onkeypress = (e) => { 
         if(e.key === 'Enter') performSearch(); 
     };
-
-    // Səhifə yüklənəndə yaddaşdakı rejimi yoxla
-    if(localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light-mode');
-    }
 </script>
 </body>
 </html>
