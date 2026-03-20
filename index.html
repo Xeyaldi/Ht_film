@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CINEMA EXPLORER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e50914;
+            --dark-bg: #050505;
+            --card-bg: #121212;
+            --text-color: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            transition: 0.3s;
+        }
+
+        /* Navigasiya və Dil Seçimi */
+        nav {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 40vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            background: radial-gradient(circle, rgba(229,9,20,0.1) 0%, rgba(5,5,5,1) 80%);
+        }
+
+        .hero h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        .hero p { color: #888; max-width: 600px; margin-bottom: 25px; }
+
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        /* Film Kartı */
+        #movie-result {
+            margin: 40px auto;
+            max-width: 800px;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .movie-card {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .movie-poster {
+            width: 300px;
+            min-height: 450px;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .movie-info h2 { font-size: 28px; margin-top: 0; color: #fff; }
+        .movie-meta { display: flex; gap: 15px; margin-bottom: 20px; font-size: 14px; color: #f5c518; }
+        .movie-overview { color: #bbb; line-height: 1.8; font-size: 15px; }
+
+        @media (max-width: 768px) {
+            .movie-card { flex-direction: column; }
+            .movie-poster { width: 100%; height: auto; }
+            .hero h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">CINEMA EXPLORER</div>
+        <div class="lang-switcher">
+            <button class="lang-btn active" onclick="changeLang('az', this)">AZ</button>
+            <button class="lang-btn" onclick="changeLang('tr', this)">TR</button>
+            <button class="lang-btn" onclick="changeLang('en', this)">EN</button>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1 id="hero-title">Nəyə baxacağını seçə bilmirsən?</h1>
+        <p id="hero-desc">Dünyanın ən böyük arxivindən sənin üçün təsadüfi bir film seçirik.</p>
+        <button class="action-btn" id="main-btn" onclick="getMovie()">FİLM TAP</button>
+    </div>
+
+    <div id="movie-result">
+        </div>
+
+    <script>
+        const API_KEY = 'YOUR_TMDB_API_KEY'; // TMDB-dən aldığın açarı bura qoy
+        let currentLang = 'az-AZ';
+
+        const translations = {
+            az: { title: "Nəyə baxacağını seçə bilmirsən?", desc: "Dünyanın ən böyük arxivindən sənin üçün təsadüfi bir film seçirik.", btn: "FİLM TAP", rating: "Xal:", error: "Xəta baş verdi, yenidən yoxlayın." },
+            tr: { title: "Ne izleyeceğine karar veremiyor musun?", desc: "Dünyanın en büyük arşivinden senin için rastgele bir film seçiyoruz.", btn: "FİLM BUL", rating: "Puan:", error: "Hata oluştu, tekrar deneyin." },
+            en: { title: "Can't decide what to watch?", desc: "We're picking a random movie for you from the world's largest archive.", btn: "FIND MOVIE", rating: "Rating:", error: "Error occurred, please try again." }
+        };
+
+        function changeLang(lang, btn) {
+            // Düymə stilini dəyiş
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Dil kodunu və mətni dəyiş
+            const t = translations[lang];
+            document.getElementById('hero-title').innerText = t.title;
+            document.getElementById('hero-desc').innerText = t.desc;
+            document.getElementById('main-btn').innerText = t.btn;
+            
+            currentLang = (lang === 'az') ? 'az-AZ' : (lang === 'tr' ? 'tr-TR' : 'en-US');
+            
+            // Əgər artıq bir film göstərilirsə, onu yeni dildə yeniləmək olar (istəyə bağlı)
+        }
+
+        async function getMovie() {
+            const randomPage = Math.floor(Math.random() * 500) + 1;
+            const url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=${currentLang}&sort_by=popularity.desc&page=${randomPage}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const movie = data.results[Math.floor(Math.random() * data.results.length)];
+                renderMovie(movie);
+            } catch (err) {
+                alert(translations[currentLang.split('-')[0]].error);
+            }
+        }
+
+        function renderMovie(m) {
+            const resultDiv = document.getElementById('movie-result');
+            resultDiv.style.display = 'block';
+            
+            const poster = m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster';
+            const langPrefix = currentLang.split('-')[0];
+
+            resultDiv.innerHTML = `
+                <div class="movie-card">
+                    <img src="${poster}" class="movie-poster" alt="${m.title}">
+                    <div class="movie-info">
+                        <h2>${m.title}</h2>
+                        <div class="movie-meta">
+                            <span><i class="fas fa-star"></i> ${m.vote_average} / 10</span>
+                            <span><i class="fas fa-calendar"></i> ${m.release_date}</span>
+                        </div>
+                        <p class="movie-overview">${m.overview ? m.overview : "No description available in this language."}</p>
+                    </div>
+                </div>
+            `;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
