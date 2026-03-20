@@ -3,306 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xeyal Film | Netflix Azərbaycan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Blueflix - Sərhədsiz Filmlər</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Netflix-in Göy Rəng Palitrası */
         :root {
-            --netflix-blue: #0088cc;
-            --bg-black: #141414;
+            --primary-blue: #007bff;
+            --dark-bg: #04090f;
+            --card-shadow: rgba(0, 123, 255, 0.3);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        body { 
-            background-color: var(--bg-black); 
-            color: #fff; 
-            font-family: 'Roboto', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden; 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
         }
 
-        /* --- NAVİQASİYA (NETFLIX STYLE) --- */
-        nav {
-            position: fixed; top: 0; width: 100%; padding: 20px 4%; display: flex; align-items: center; z-index: 1000;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); transition: 0.5s; box-sizing: border-box;
+        /* Naviqasiya Barı */
+        .navbar {
+            position: fixed;
+            top: 0; width: 100%;
+            display: flex; align-items: center;
+            padding: 20px 4%;
+            z-index: 1000;
+            transition: background-color 0.5s;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
         }
-        nav.black { background: #000; }
-        .logo { color: var(--netflix-blue); font-size: 28px; font-weight: bold; text-decoration: none; margin-right: 30px; letter-spacing: -1px; }
-        .nav-links { display: flex; list-style: none; gap: 18px; padding: 0; margin: 0; flex-grow: 1; }
-        .nav-links li a { color: #e5e5e5; text-decoration: none; font-size: 14px; transition: 0.3s; }
-        .nav-links li a:hover { color: #b3b3b3; }
 
-        .nav-right { display: flex; align-items: center; gap: 15px; }
-        .search-box { border: 1px solid #fff; padding: 3px 10px; background: rgba(0,0,0,0.6); display: flex; align-items: center; }
-        .search-box input { background: transparent; border: none; color: #fff; outline: none; width: 130px; font-size: 13px; }
+        .navbar.scrolled { background-color: var(--dark-bg); }
 
-        /* --- BANNER (QƏHRƏMAN BÖLMƏSİ) --- */
+        .logo {
+            color: var(--primary-blue);
+            font-size: 32px;
+            font-weight: 900;
+            text-decoration: none;
+            letter-spacing: -1px;
+            margin-right: 40px;
+        }
+
+        .nav-menu { display: flex; list-style: none; gap: 20px; }
+        .nav-menu a { color: #e5e5e5; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .nav-menu a:hover { color: #b3b3b3; }
+
+        /* Ana Banner (Hero) */
         .banner {
-            height: 85vh; background-size: cover; background-position: center 20%; display: flex;
-            flex-direction: column; justify-content: center; padding-left: 4%; position: relative;
+            height: 95vh;
+            background-size: cover;
+            background-position: center center;
+            display: flex;
+            align-items: center;
+            padding: 0 4%;
+            position: relative;
         }
-        .banner__title { font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
-        .banner__description { line-height: 1.3; font-size: 1.1rem; max-width: 500px; height: 75px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; text-shadow: 1px 1px 5px #000; }
+
+        .banner__contents {
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        .banner__title { font-size: 4rem; font-weight: 800; padding-bottom: 0.3rem; }
+        .banner__description {
+            line-height: 1.3; padding-top: 1rem; font-size: 1.2rem;
+            max-width: 500px; height: 80px; display: -webkit-box;
+            -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
         .banner__button {
-            cursor: pointer; color: #fff; border: none; font-weight: 700; border-radius: 4px;
-            padding: 0.7rem 2.2rem; margin-right: 1rem; background-color: rgba(51, 51, 51, 0.7); transition: 0.3s;
-            display: inline-flex; align-items: center; gap: 10px; font-size: 16px;
+            cursor: pointer; color: #fff; outline: none; border: none;
+            font-weight: 700; border-radius: 0.2vw; padding: 12px 35px;
+            margin-right: 1rem; background-color: rgba(51, 51, 51, 0.5);
+            transition: all 0.2s;
         }
-        .banner__button:hover { background-color: #fff; color: #000; }
-        .banner--fadeBottom { height: 12rem; background-image: linear-gradient(180deg, transparent, rgba(37,37,37,0.6), var(--bg-black)); position: absolute; bottom: 0; width: 100%; left: 0; }
 
-        /* --- CƏRGƏLƏR (ROWS) --- */
-        .row { margin-left: 4%; margin-top: 25px; }
-        .row__title { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; color: #e5e5e5; }
-        .row__posters { display: flex; overflow-y: hidden; overflow-x: scroll; padding: 20px 0; scrollbar-width: none; }
+        .banner__button:hover { color: #000; background-color: #e6e6e6; }
+        .btn-blue { background-color: var(--primary-blue) !important; color: white !important; }
+
+        .banner--fadeBottom {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 14.7rem;
+            background-image: linear-gradient(180deg, transparent, rgba(37, 37, 37, 0.61), var(--dark-bg));
+        }
+
+        /* Film Sıraları */
+        .row { margin: 20px 0 20px 4%; }
+        .row__title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        
+        .row__posters {
+            display: flex; overflow-y: hidden; overflow-x: scroll;
+            padding: 20px; gap: 10px; scroll-behavior: smooth;
+        }
         .row__posters::-webkit-scrollbar { display: none; }
-        
+
         .row__poster {
-            max-height: 155px; object-fit: contain; margin-right: 12px; transition: transform 450ms; cursor: pointer; border-radius: 4px;
+            max-height: 160px; object-fit: contain; width: 100%;
+            transition: var(--transition); border-radius: 4px;
         }
-        .row__poster:hover { transform: scale(1.1); z-index: 100; box-shadow: 0 0 15px var(--netflix-blue); }
 
-        /* TOP 10 RƏQƏMLƏRİ */
-        .top10-item { position: relative; display: flex; align-items: center; min-width: 250px; }
-        .top10-number {
-            font-size: 160px; font-weight: 900; color: #141414; -webkit-text-stroke: 3px #555;
-            margin-right: -45px; z-index: 1; user-select: none;
+        .row__poster:hover {
+            transform: scale(1.4);
+            z-index: 100;
+            box-shadow: 0px 0px 15px 5px var(--card-shadow);
         }
-        .top10-img { height: 155px; z-index: 2; border-radius: 4px; transition: 0.3s; }
 
-        /* --- MODAL (FİLM PƏNCƏRƏSİ) --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
-        .modal-content { width: 850px; margin: 40px auto; background: #181818; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 0 50px #000; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 35px; cursor: pointer; z-index: 100; color: #fff; }
-        iframe { width: 100%; height: 480px; border: none; background: #000; }
-        .modal-body { padding: 35px; }
+        /* Film İzləmə Modalı */
+        .modal {
+            display: none; position: fixed; z-index: 2000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
 
-        .cast-card img { width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 2px solid #333; margin-bottom: 5px; }
+        .modal-content {
+            position: relative; margin: 5% auto; width: 80%;
+            max-width: 900px; background: #111; border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .close { position: absolute; right: 20px; top: 10px; font-size: 30px; cursor: pointer; z-index: 2100; }
         
-        /* ŞƏRH BÖLMƏSİ */
-        .comment-box { background: #222; padding: 20px; border-radius: 8px; margin-top: 30px; }
-        .comment-input { background: #111; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; border-radius: 4px; margin-top: 10px; box-sizing: border-box; }
-
-        @media (max-width: 768px) { .modal-content { width: 95%; } .banner__title { font-size: 2rem; } .top10-number { font-size: 100px; } }
+        iframe { width: 100%; height: 500px; border: none; }
     </style>
 </head>
 <body>
 
-<nav id="nav">
-    <a href="javascript:location.reload()" class="logo">XEYAL FİLM</a>
-    <ul class="nav-links">
-        <li><a href="#" onclick="javascript:location.reload()">Ana Səhifə</a></li>
-        <li><a href="#" onclick="loadCategory('/discover/tv', 'Seriallar')">Seriallar</a></li>
-        <li><a href="#" onclick="loadCategory('/discover/movie', 'Filmlər')">Filmlər</a></li>
-        <li><a href="#" onclick="loadCategory('/discover/movie', 'Yerli Filmlər', '&with_original_language=az')">Yerli Filmlər</a></li>
-        <li><a href="#" onclick="loadFavorites()">Siyahım</a></li>
-    </ul>
-    <div class="nav-right">
-        <div class="search-box">
-            <i class="fas fa-search" style="cursor:pointer;" onclick="performSearch()"></i>
-            <input type="text" id="srch" placeholder="Axtarış...">
+    <nav class="navbar" id="nav">
+        <a href="#" class="logo">BLUEFLIX</a>
+        <ul class="nav-menu">
+            <li><a href="#">Ana Səhifə</a></li>
+            <li><a href="#">Seriallar</a></li>
+            <li><a href="#">Filmlər</a></li>
+            <li><a href="#">Yeni</a></li>
+            <li><a href="#">Siyahım</a></li>
+        </ul>
+    </nav>
+
+    <header class="banner" id="banner">
+        <div class="banner__contents">
+            <h1 class="banner__title" id="banner-title"></h1>
+            <div class="banner__buttons">
+                <button class="banner__button btn-blue"><i class="fas fa-play"></i> Oynat</button>
+                <button class="banner__button"><i class="fas fa-info-circle"></i> Ətraflı</button>
+            </div>
+            <h1 class="banner__description" id="banner-desc"></h1>
         </div>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" width="32" style="border-radius:3px;">
-    </div>
-</nav>
+        <div class="banner--fadeBottom"></div>
+    </header>
 
-<header class="banner" id="banner">
-    <div style="z-index: 2;">
-        <h1 class="banner__title" id="bannerTitle">Yüklənir...</h1>
-        <div class="banner__buttons">
-            <button class="banner__button" id="playBtn" style="background:#fff; color:#000;"><i class="fas fa-play"></i> İzlə</button>
-            <button class="banner__button" id="addListBtn"><i class="fas fa-plus"></i> Siyahıma Əlavə Et</button>
+    <div id="movie-rows">
         </div>
-        <p class="banner__description" id="bannerDesc"></p>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVideo()">&times;</span>
+            <div id="videoPlayer"></div>
+        </div>
     </div>
-    <div class="banner--fadeBottom"></div>
-</header>
 
-<div class="row" id="favSection" style="display:none;">
-    <h2 class="row__title">Mənim Siyahım</h2>
-    <div class="row__posters" id="favRow"></div>
-</div>
+    <script>
+        // *** TMDB API AÇARINI BURA YAZ ***
+        const API_KEY = '5e6629737920155b9e2501d51a662e15'; // Test üçün bura bir açar qoydum, amma özününkü ilə dəyişsən yaxşı olar.
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/original';
 
-<div class="row">
-    <h2 class="row__title">Dünyada Top 10</h2>
-    <div class="row__posters" id="top10Row"></div>
-</div>
+        const requests = {
+            trending: `/trending/all/week?api_key=${API_KEY}&language=az-AZ`,
+            originals: `/discover/tv?api_key=${API_KEY}&with_networks=213&language=az-AZ`,
+            topRated: `/movie/top_rated?api_key=${API_KEY}&language=az-AZ`,
+            action: `/discover/movie?api_key=${API_KEY}&with_genres=28`,
+        };
 
-<div class="row">
-    <h2 class="row__title" id="mainTitle">Trenddə Olanlar</h2>
-    <div class="row__posters" id="mainRow"></div>
-</div>
+        // Naviqasiya Scroll Effekti
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 100) document.getElementById("nav").classList.add("scrolled");
+            else document.getElementById("nav").classList.remove("scrolled");
+        });
 
-<div class="row">
-    <h2 class="row__title">Tezliklə Ekranlarda</h2>
-    <div class="row__posters" id="upcomingRow"></div>
-</div>
-
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeP()">&times;</span>
-        <iframe id="ifr" src="" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"></iframe>
-        <div class="modal-body">
-            <h2 id="mT" style="color:var(--netflix-blue); margin:0;"></h2>
-            <p id="mD" style="color:#aaa; line-height:1.6; margin-top:15px; font-size:15px;"></p>
+        async function init() {
+            // Banner üçün Trend filmi çək
+            const res = await fetch(BASE_URL + requests.trending);
+            const data = await res.json();
+            const bannerMovie = data.results[Math.floor(Math.random() * data.results.length)];
             
-            <h4 style="margin-top:25px; border-left:4px solid var(--netflix-blue); padding-left:10px;">AKTYOR HEYƏTİ</h4>
-            <div id="mCast" style="display:flex; gap:15px; overflow-x:auto; padding:15px 0; scrollbar-width:none;"></div>
+            document.getElementById('banner').style.backgroundImage = `url(${IMG_URL + bannerMovie.backdrop_path})`;
+            document.getElementById('banner-title').innerText = bannerMovie.title || bannerMovie.name;
+            document.getElementById('banner-desc').innerText = bannerMovie.overview;
 
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="banner__button" style="background:var(--netflix-blue); color:#fff;" onclick="setS(1)">Əsas Server</button>
-                <button class="banner__button" onclick="setS(2)">Ehtiyat Server</button>
-                <button class="banner__button" style="background:#ff4757;" id="btnTrailer" onclick="openTrailer()">Fraqment</button>
-            </div>
+            // Kateqoriyaları yarat
+            createRow("Blueflix Orijinalları", requests.originals, true);
+            createRow("İndi Trenddə", requests.trending);
+            createRow("Ən Çox Bəyənilənlər", requests.topRated);
+            createRow("Döyüş Filmləri", requests.action);
+        }
 
-            <div class="comment-box">
-                <h4 style="margin:0;">ŞƏRHLƏR</h4>
-                <div id="comList" style="margin-top:15px; max-height:200px; overflow-y:auto;"></div>
-                <input type="text" id="comUser" class="comment-input" placeholder="Adınız...">
-                <textarea id="comText" class="comment-input" style="height:70px; resize:none;" placeholder="Fikrinizi bura yazın..."></textarea>
-                <button class="banner__button" style="margin-top:10px; width:100%; justify-content:center;" onclick="addComment()">Şərhi Göndər</button>
-            </div>
-        </div>
-    </div>
-</div>
+        async function createRow(title, fetchUrl, isLarge = false) {
+            const res = await fetch(BASE_URL + fetchUrl);
+            const data = await res.json();
+            
+            const row = document.createElement('div');
+            row.classList.add('row');
+            row.innerHTML = `<h2 class="row__title">${title}</h2>`;
+            
+            const posters = document.createElement('div');
+            posters.classList.add('row__posters');
 
-<script>
-    const KEY = 'c972e47d1574ac86dfe1d93d7e4a0b35';
-    const IMG = 'https://image.tmdb.org/t/p/original';
-    const POSTER = 'https://image.tmdb.org/t/p/w500';
-    let curID, curType, curTrailer = "";
+            data.results.forEach(movie => {
+                const img = document.createElement('img');
+                img.src = IMG_URL + (isLarge ? movie.poster_path : movie.backdrop_path);
+                img.classList.add('row__poster');
+                img.onclick = () => openVideo(movie.id, movie.media_type || 'movie');
+                posters.appendChild(img);
+            });
 
-    window.onscroll = () => {
-        const nav = document.getElementById('nav');
-        if (window.scrollY > 100) nav.classList.add('black');
-        else nav.classList.remove('black');
-    };
+            row.appendChild(posters);
+            document.getElementById('movie-rows').appendChild(row);
+        }
 
-    window.onload = () => {
-        loadBanner();
-        loadTop10();
-        loadRow('/movie/upcoming', 'upcomingRow');
-        loadCategory('/trending/all/week', 'Trenddə Olanlar');
-        loadFavorites();
-    };
+        async function openVideo(id, type) {
+            const res = await fetch(`${BASE_URL}/${type}/${id}/videos?api_key=${API_KEY}`);
+            const data = await res.json();
+            const trailer = data.results.find(v => v.type === 'Trailer');
+            
+            if (trailer) {
+                document.getElementById('videoModal').style.display = 'block';
+                document.getElementById('videoPlayer').innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" allowfullscreen></iframe>
+                `;
+            } else {
+                alert("Təəssüf ki, treyler tapılmadı!");
+            }
+        }
 
-    async function loadBanner() {
-        const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        const m = data.results[Math.floor(Math.random() * 5)];
-        document.getElementById('banner').style.backgroundImage = `linear-gradient(to right, rgba(20,20,20,0.9), transparent), url(${IMG + m.backdrop_path})`;
-        document.getElementById('bannerTitle').innerText = m.title || m.name;
-        document.getElementById('bannerDesc').innerText = m.overview;
-        document.getElementById('playBtn').onclick = () => openP(m.id, m.media_type);
-    }
+        function closeVideo() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoPlayer').innerHTML = '';
+        }
 
-    async function loadTop10() {
-        const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        const row = document.getElementById('top10Row');
-        data.results.slice(0, 10).forEach((m, i) => {
-            const div = document.createElement('div');
-            div.className = 'top10-item';
-            div.innerHTML = `<span class="top10-number">${i+1}</span><img src="${POSTER + m.poster_path}" class="top10-img" onclick="openP(${m.id}, 'movie')">`;
-            row.appendChild(div);
-        });
-    }
-
-    async function loadRow(path, rowId) {
-        const res = await fetch(`https://api.themoviedb.org/3${path}?api_key=${KEY}&language=tr-TR`);
-        const data = await res.json();
-        const row = document.getElementById(rowId);
-        data.results.forEach(m => {
-            const img = document.createElement('img');
-            img.src = POSTER + (m.backdrop_path || m.poster_path);
-            img.className = 'row__poster';
-            img.onclick = () => openP(m.id, 'movie');
-            row.appendChild(img);
-        });
-    }
-
-    async function loadCategory(path, title, query = '') {
-        const row = document.getElementById('mainRow');
-        document.getElementById('mainTitle').innerText = title;
-        row.innerHTML = '';
-        const res = await fetch(`https://api.themoviedb.org/3${path}?api_key=${KEY}&language=tr-TR${query}`);
-        const data = await res.json();
-        data.results.forEach(m => {
-            const img = document.createElement('img');
-            img.src = POSTER + (m.backdrop_path || m.poster_path);
-            img.className = 'row__poster';
-            img.onclick = () => openP(m.id, m.media_type || (m.title ? 'movie' : 'tv'));
-            row.appendChild(img);
-        });
-    }
-
-    async function openP(id, type) {
-        curID = id; curType = type;
-        const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${KEY}&language=tr-TR&append_to_response=credits,videos`);
-        const m = await res.json();
-        document.getElementById('mT').innerText = m.title || m.name;
-        document.getElementById('mD').innerText = m.overview;
-        
-        document.getElementById('mCast').innerHTML = m.credits.cast.slice(0, 10).map(c => `
-            <div style="text-align:center; min-width:80px;">
-                <img src="${c.profile_path ? POSTER + c.profile_path : 'https://via.placeholder.com/80'}" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid #333;">
-                <p style="font-size:11px; margin-top:5px;">${c.name}</p>
-            </div>`).join('');
-
-        const trailer = m.videos.results.find(v => v.type === 'Trailer');
-        curTrailer = trailer ? `https://www.youtube.com/embed/${trailer.key}` : "";
-        document.getElementById('btnTrailer').style.display = curTrailer ? "inline-block" : "none";
-        
-        setS(1);
-        document.getElementById('modal').style.display = 'block';
-        loadComments(id);
-    }
-
-    function setS(s) {
-        const b = s === 1 ? 'https://vidsrc.to/embed' : 'https://vidsrc.xyz/embed';
-        document.getElementById('ifr').src = `${b}/${curType}/${curID}`;
-    }
-
-    function closeP() { document.getElementById('modal').style.display = 'none'; document.getElementById('ifr').src = ''; }
-
-    function addComment() {
-        const user = document.getElementById('comUser').value || "Anonim";
-        const text = document.getElementById('comText').value;
-        if(!text) return;
-        let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
-        if(!comments[curID]) comments[curID] = [];
-        comments[curID].unshift({ user, text, date: new Date().toLocaleDateString('az-AZ') });
-        localStorage.setItem('x_comments', JSON.stringify(comments));
-        document.getElementById('comText').value = '';
-        loadComments(curID);
-    }
-
-    function loadComments(id) {
-        let comments = JSON.parse(localStorage.getItem('x_comments') || '{}');
-        const list = document.getElementById('comList');
-        list.innerHTML = (comments[id] || []).map(c => `
-            <div style="background:#111; padding:10px; border-radius:4px; margin-bottom:10px; border-left:2px solid var(--netflix-blue);">
-                <strong style="font-size:13px;">${c.user}</strong> <small style="color:#555">(${c.date})</small>
-                <p style="margin:5px 0; font-size:14px;">${c.text}</p>
-            </div>`).join('');
-    }
-
-    function openTrailer() { if(curTrailer) document.getElementById('ifr').src = curTrailer; }
-
-    function performSearch() {
-        const v = document.getElementById('srch').value;
-        if(v) loadCategory('/search/multi', `Axtarış nəticəsi: ${v}`, `&query=${encodeURIComponent(v)}`);
-    }
-    document.getElementById('srch').onkeypress = (e) => { if(e.key === 'Enter') performSearch(); };
-
-    function loadFavorites() {
-        const favs = JSON.parse(localStorage.getItem('x_favs') || '[]');
-        const sec = document.getElementById('favSection');
-        if(favs.length > 0) {
-            sec.style.display = 'block';
-            document.getElementById('favRow').innerHTML = favs.map(f => `<img src="${POSTER + f.img}" class="row__poster" onclick="openP(${f.id}, '${f.type}')">`).join('');
-        } else sec.style.display = 'none';
-    }
-</script>
+        init();
+    </script>
 </body>
 </html>
